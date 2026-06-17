@@ -132,7 +132,11 @@ function Painel() {
   // Supabase Data Fetching
   useEffect(() => {
     const fetchData = async () => {
-      const { data: servicosData } = await supabase.from('servicos').select('*')
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return;
+      const userId = session.user.id;
+
+      const { data: servicosData } = await supabase.from('servicos').select('*').eq('user_id', userId)
       if (servicosData) {
         setServicos(servicosData)
         if (servicosData.length > 0 && !formServico) {
@@ -140,25 +144,23 @@ function Painel() {
         }
       }
 
-      const { data: clientesData } = await supabase.from('clientes').select('*')
+      const { data: clientesData } = await supabase.from('clientes').select('*').eq('user_id', userId)
       if (clientesData) setClientes(clientesData)
 
-      const { data: agendamentosData } = await supabase.from('agendamentos').select('*')
+      const { data: agendamentosData } = await supabase.from('agendamentos').select('*').eq('user_id', userId)
       if (agendamentosData) setAgendamentos(agendamentosData)
 
-      const { data: despesasData } = await supabase.from('despesas').select('*')
+      const { data: despesasData } = await supabase.from('despesas').select('*').eq('user_id', userId)
       if (despesasData) setDespesas(despesasData)
 
-      const { data: funcData } = await supabase.from('funcionarios').select('*')
+      const { data: funcData } = await supabase.from('funcionarios').select('*').eq('user_id', userId)
       if (funcData) setFuncionarios(funcData)
 
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        const { data: myUser } = await supabase.from('assinantes').select('*').eq('id', session.user.id).single()
-        if (myUser) {
-          setAssinanteAuth(myUser)
-          setFormMpToken(myUser.mp_access_token || '')
-          setFormBotNumero(myUser.bot_numero_teste || '')
+      const { data: myUser } = await supabase.from('assinantes').select('*').eq('id', userId).single()
+      if (myUser) {
+        setAssinanteAuth(myUser)
+        setFormMpToken(myUser.mp_access_token || '')
+        setFormBotNumero(myUser.bot_numero_teste || '')
           
           let defaultSlug = '';
           if (myUser.nome_empresa) {
@@ -190,7 +192,6 @@ function Painel() {
           }
         }
       }
-    }
     fetchData()
 
     // Realtime para Agendamentos (Atualiza o Dashboard instantaneamente se pago via webhook)
@@ -590,7 +591,8 @@ function Painel() {
         nome: formNome,
         celular: sanitizedCel,
         veiculo: formVeiculo,
-        placa: formPlaca.toUpperCase()
+        placa: formPlaca.toUpperCase(),
+        user_id: assinanteAuth.id
       }
       const { data: insertedCli, error: errCli } = await supabase.from('clientes').insert(novoCli).select().single()
       if (!errCli && insertedCli) {
@@ -636,7 +638,8 @@ function Painel() {
       cliente_nome: formNome,
       veiculo_modelo: formVeiculo,
       celular_cliente: sanitizedCel,
-      funcionario_id: formAgendFuncionario || null
+      funcionario_id: formAgendFuncionario || null,
+      user_id: assinanteAuth.id
     }
 
     const { data: insertedAgend, error: errAgend } = await supabase.from('agendamentos').insert(novoAgendamento).select().single()
@@ -708,8 +711,8 @@ function Painel() {
 
   // Serviços Actions
   const handleAddServico = async () => {
-    const checklistPadrao = 'Lavagem Externa\nAspiração Interna\nHigienização de Painel\nAcabamento nos Pneus (Pretinho)';
-    const newServico = { nome: 'Novo Serviço', preco: 0, duracao: 30, checklist: checklistPadrao };
+    const checklistPadrao = 'Lavagem Externa\\nAspiração Interna\\nHigienização de Painel\\nAcabamento nos Pneus (Pretinho)';
+    const newServico = { nome: 'Novo Serviço', preco: 0, duracao: 30, checklist: checklistPadrao, user_id: assinanteAuth.id };
     const { data: inserted, error } = await supabase.from('servicos').insert(newServico).select().single()
     if (!error && inserted) {
       setServicos(prev => [...prev, inserted]);
@@ -718,6 +721,9 @@ function Painel() {
       setEditPreco(0);
       setEditDuracao(30);
       setEditChecklist(checklistPadrao);
+    } else if (error) {
+      alert("Erro ao criar serviço: " + error.message);
+      console.error(error);
     }
   }
 
@@ -799,7 +805,8 @@ function Painel() {
       descricao: formDespesaDesc,
       valor: Number(formDespesaValor),
       data: formDespesaData,
-      categoria: formDespesaCat
+      categoria: formDespesaCat,
+      user_id: assinanteAuth.id
     };
     const { data, error } = await supabase.from('despesas').insert(newDespesa).select().single();
     if (!error && data) {
@@ -808,6 +815,8 @@ function Painel() {
       setFormDespesaValor('');
       setFormDespesaData(new Date().toISOString().slice(0, 10));
       setFormDespesaCat('Geral');
+    } else if (error) {
+      alert("Erro ao salvar despesa: " + error.message);
     }
   };
 
@@ -826,7 +835,8 @@ function Painel() {
       nome: formFuncNome,
       cargo: formFuncCargo,
       comissao_percentual: Number(formFuncComissao) || 0,
-      telefone: formFuncTelefone.replace(/\D/g, '')
+      telefone: formFuncTelefone.replace(/\\D/g, ''),
+      user_id: assinanteAuth.id
     };
     const { data, error } = await supabase.from('funcionarios').insert(newFunc).select().single();
     if (!error && data) {
@@ -835,6 +845,8 @@ function Painel() {
       setFormFuncCargo('Lavador');
       setFormFuncComissao('');
       setFormFuncTelefone('');
+    } else if (error) {
+      alert("Erro ao salvar funcionário: " + error.message);
     }
   };
 

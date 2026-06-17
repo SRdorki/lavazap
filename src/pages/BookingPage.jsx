@@ -46,17 +46,15 @@ function BookingPage() {
             document.documentElement.style.removeProperty('--primary-color');
           }
 
-          const { data: srvsAll, error: srvsErr } = await supabase.from('servicos').select('*');
-          const srvs = srvsAll ? srvsAll.filter(s => s.user_id === storeData.id) : [];
+          const { data: srvs, error: srvsErr } = await supabase.from('servicos').select('*').eq('user_id', storeData.id);
           console.log("LOG DEBUG BookingPage -> storeData.id:", storeData.id);
-          console.log("LOG DEBUG BookingPage -> srvsAll:", srvsAll);
           console.log("LOG DEBUG BookingPage -> srvs:", srvs);
           console.log("LOG DEBUG BookingPage -> srvsErr:", srvsErr);
           
-          if (srvsAll) {
-            setServicos(srvsAll); // TEMPORARY FIX: Set all services to see if it renders
-            if (srvsAll.length > 0 && !searchParams.get('servicoId')) {
-              setServicoId(srvsAll[0].id);
+          if (srvs) {
+            setServicos(srvs);
+            if (srvs.length > 0 && !searchParams.get('servicoId')) {
+              setServicoId(srvs[0].id);
             }
           }
         }
@@ -205,7 +203,6 @@ function BookingPage() {
           )}
           <h1>Agendamento Online</h1>
           <p>Preencha os dados para confirmar seu horário.</p>
-          <p style={{color: 'red', fontSize: '10px'}}>Debug Loja ID: {loja.id}</p>
         </div>
 
         {sucesso ? (
