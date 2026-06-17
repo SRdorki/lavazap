@@ -151,9 +151,8 @@ function BookingPage() {
           user_id: loja.id,
           nome,
           celular: cleanCelular,
-          veiculos: [{ modelo: veiculo, placa: placa.toUpperCase() }],
-          total_gasto: 0,
-          lavagens: 0
+          veiculo: veiculo,
+          placa: placa.toUpperCase()
         };
         const { data: insertedCli } = await supabase.from('clientes').insert(novoCli).select().single();
         if (insertedCli) finalClienteId = insertedCli.id;
@@ -257,4 +256,5 @@ function BookingPage() {
 }
 
 export default BookingPage;
+
 
