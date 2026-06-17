@@ -1,0 +1,117 @@
+.booking-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color, #0f172a);
+  padding: 20px;
+}
+
+.booking-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.booking-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.booking-logo {
+  max-width: 120px;
+  max-height: 80px;
+  margin-bottom: 20px;
+}
+
+.booking-logo-placeholder {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: var(--primary-color, #009ee3);
+  margin: 0 auto 20px auto;
+}
+
+.booking-header h1 {
+  font-size: 24px;
+  color: var(--text-primary, #fff);
+  margin-bottom: 8px;
+}
+
+.booking-header p {
+  color: var(--text-secondary, #94a3b8);
+  font-size: 14px;
+}
+
+.booking-form .form-group {
+  margin-bottom: 20px;
+}
+
+.booking-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary, #fff);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.booking-form input,
+.booking-form select {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-size: 15px;
+}
+
+.booking-form input:focus,
+.booking-form select:focus {
+  outline: none;
+  border-color: var(--primary-color, #009ee3);
+}
+
+.booking-submit {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 10px;
+  background-color: var(--primary-color, #009ee3);
+}
+
+.booking-success {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.booking-success h2 {
+  color: #22c55e;
+  margin-bottom: 16px;
+}
+
+.booking-success p {
+  color: var(--text-secondary, #94a3b8);
+  margin-bottom: 24px;
+}
+
+.booking-footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+}
+
+.booking-footer strong {
+  color: var(--primary-color, #009ee3);
+}
