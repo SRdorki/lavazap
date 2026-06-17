@@ -1190,3 +1190,175 @@ select.form-input option {
 .btn-bulk.outline:hover {
   background-color: var(--bg-elevated);
 }
+
+/* ==========================================================================
+   Responsive Adaptation (Mobile & Tablet)
+   ========================================================================== */
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .metrics-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .kanban-board {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .main-content {
+    padding: 24px;
+    gap: 24px;
+  }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+
+  .app-container {
+    flex-direction: column;
+  }
+
+  /* Sidebar becomes an offcanvas drawer */
+  .sidebar {
+    transform: translateX(-100%);
+    width: 260px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Overlay for when sidebar is open on mobile */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(5, 7, 12, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 90;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.visible {
+    display: block;
+    opacity: 1;
+  }
+
+  /* Main Content Layout */
+  .main-content {
+    margin-left: 0;
+    padding: 16px;
+    gap: 16px;
+    width: 100%;
+  }
+
+  /* Header Mobile */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    height: auto;
+    padding-bottom: 12px;
+  }
+
+  .header-mobile-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .btn-mobile-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .search-container {
+    width: 100%;
+    flex: 1;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  /* Typography adjustments */
+  .title-lg {
+    font-size: 24px;
+  }
+
+  /* Metrics Strip */
+  .metrics-strip {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Kanban Board */
+  .kanban-board {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .kanban-column {
+    min-height: auto;
+  }
+
+  /* Data Tables - Make them scrollable horizontally */
+  .data-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+  }
+
+  .data-table {
+    border: none;
+    min-width: 600px;
+  }
+
+  /* Forms & Modals */
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Calendar */
+  .calendar-container {
+    height: auto;
+    min-height: 400px;
+  }
+}
+
+/* Button to show/hide menu only visible on mobile */
+@media (min-width: 769px) {
+  .btn-mobile-menu {
+    display: none !important;
+  }
+}
+

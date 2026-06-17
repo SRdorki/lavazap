@@ -35,6 +35,7 @@ function Painel() {
   const [pesquisaCliente, setPesquisaCliente] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCards, setSelectedCards] = useState([])
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Formulário Modal State
   const [formCelular, setFormCelular] = useState('')
@@ -1084,7 +1085,8 @@ function Painel() {
   return (
     <div className="app-container">
       {/* Sidebar Navigation */}
-      <aside className="sidebar">
+      <div className={`sidebar-overlay ${isMobileMenuOpen ? 'visible' : ''}`} onClick={() => setIsMobileMenuOpen(false)}></div>
+      <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="logo-section">
           {formWhitelabelLogo && assinanteAuth?.nome_plano !== 'start' ? (
             <img src={formWhitelabelLogo} alt="Logo da Empresa" style={{ maxHeight: '36px', borderRadius: '4px' }} />
@@ -1099,28 +1101,28 @@ function Painel() {
           <div className="menu-category">Menu</div>
           <div 
             className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-solid fa-chart-simple"></i></span>
             <span>Dashboard / Fluxo</span>
           </div>
           <div 
             className={`menu-item ${activeTab === 'clientes' ? 'active' : ''}`}
-            onClick={() => setActiveTab('clientes')}
+            onClick={() => { setActiveTab('clientes'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-solid fa-users"></i></span>
             <span>Clientes</span>
           </div>
           <div 
             className={`menu-item ${activeTab === 'agenda' ? 'active' : ''}`}
-            onClick={() => setActiveTab('agenda')}
+            onClick={() => { setActiveTab('agenda'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-regular fa-calendar-days"></i></span>
             <span>Agenda</span>
           </div>
           <div 
             className={`menu-item ${activeTab === 'servicos' ? 'active' : ''}`}
-            onClick={() => setActiveTab('servicos')}
+            onClick={() => { setActiveTab('servicos'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-solid fa-shower"></i></span>
             <span>Serviços</span>
@@ -1128,7 +1130,7 @@ function Painel() {
           <div className="menu-category">Estatísticas</div>
           <div 
             className={`menu-item ${activeTab === 'relatorios' ? 'active' : ''}`}
-            onClick={() => setActiveTab('relatorios')}
+            onClick={() => { setActiveTab('relatorios'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-solid fa-chart-pie"></i></span>
             <span>Relatórios</span>
@@ -1136,14 +1138,14 @@ function Painel() {
           <div className="menu-category">Administração</div>
           <div 
             className={`menu-item ${activeTab === 'financeiro' ? 'active' : ''}`}
-            onClick={() => setActiveTab('financeiro')}
+            onClick={() => { setActiveTab('financeiro'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-solid fa-sack-dollar"></i></span>
             <span>Financeiro</span>
           </div>
           <div 
             className={`menu-item ${activeTab === 'equipe' ? 'active' : ''}`}
-            onClick={() => setActiveTab('equipe')}
+            onClick={() => { setActiveTab('equipe'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-solid fa-user-tag"></i></span>
             <span>Equipe</span>
@@ -1151,7 +1153,7 @@ function Painel() {
 
           <div 
             className={`menu-item ${activeTab === 'configuracoes' ? 'active' : ''}`}
-            onClick={() => setActiveTab('configuracoes')}
+            onClick={() => { setActiveTab('configuracoes'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-solid fa-gear"></i></span>
             <span>Configurações</span>
@@ -1199,6 +1201,7 @@ function Painel() {
           <>
             {/* Header */}
             <header className="header">
+              <button className="btn-mobile-menu" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
               <div>
                 <h1 className="title-lg">Fluxo de Lavagens</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Acompanhe os veículos em tempo real e realize agendamentos integrados com CRM.</p>
@@ -1471,6 +1474,7 @@ function Painel() {
         {activeTab === 'agenda' && (
           <div className="tab-content">
             <header className="header">
+              <button className="btn-mobile-menu" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
               <div>
                 <h1 className="title-lg">Agenda</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Histórico completo e próximos agendamentos.</p>
@@ -1608,6 +1612,7 @@ function Painel() {
         {activeTab === 'clientes' && (
           <div className="tab-content">
             <header className="header">
+              <button className="btn-mobile-menu" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
               <div>
                 <h1 className="title-lg">Clientes</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Histórico e CRM dos clientes registrados.</p>
@@ -1698,6 +1703,7 @@ function Painel() {
         {activeTab === 'servicos' && (
           <div className="tab-content">
             <header className="header">
+              <button className="btn-mobile-menu" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
               <div>
                 <h1 className="title-lg">Serviços</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Catálogo de serviços oferecidos.</p>
@@ -1797,6 +1803,7 @@ function Painel() {
         {activeTab === 'financeiro' && (
           <div className="tab-content">
             <header className="header">
+              <button className="btn-mobile-menu" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
               <div>
                 <h1 className="title-lg">Financeiro</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Gestão de receitas, despesas e lucro líquido.</p>
@@ -1885,6 +1892,7 @@ function Painel() {
         {activeTab === 'equipe' && (
           <div className="tab-content">
             <header className="header">
+              <button className="btn-mobile-menu" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
               <div>
                 <h1 className="title-lg">Equipe e Comissões</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Gerencie seus funcionários e pagamentos.</p>
@@ -1987,6 +1995,7 @@ function Painel() {
           return (
             <div className="tab-content">
               <header className="header">
+              <button className="btn-mobile-menu" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
                 <div>
                   <h1 className="title-lg">Relatórios</h1>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Métricas e análise de desempenho da estética automotiva.</p>
@@ -2083,6 +2092,7 @@ function Painel() {
         {activeTab === 'configuracoes' && (
           <div className="tab-content">
             <header className="header">
+              <button className="btn-mobile-menu" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
               <div>
                 <h1 className="title-lg">Configurações</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Ajustes do sistema e perfil da loja.</p>
@@ -2524,3 +2534,5 @@ function Painel() {
 }
 
 export default Painel
+
+

@@ -51,6 +51,24 @@ export default function SuperAdmin() {
     }
   }
 
+  async function editWebhook(id, currentUrl) {
+    const newUrl = window.prompt('Digite a nova URL do Webhook do n8n para este assinante (deixe em branco para remover):', currentUrl || '');
+    if (newUrl === null) return; // Cancelou
+
+    try {
+      const { error } = await supabase
+        .from('assinantes')
+        .update({ n8n_webhook_url: newUrl.trim() })
+        .eq('id', id);
+
+      if (error) throw error;
+      fetchAssinantes();
+    } catch (err) {
+      console.error('Erro ao atualizar webhook:', err);
+      alert('Erro ao atualizar webhook. Lembre-se de adicionar a coluna n8n_webhook_url no banco de dados!');
+    }
+  }
+
   return (
     <div className="app-container">
       {/* Sidebar Simples para Admin */}
@@ -98,6 +116,7 @@ export default function SuperAdmin() {
                   <th>STATUS DO PLANO</th>
                   <th>VENCIMENTO DO TESTE</th>
                   <th>PERFIL</th>
+                  <th>WEBHOOK N8N</th>
                   <th>AÇÕES</th>
                 </tr>
               </thead>
@@ -125,7 +144,18 @@ export default function SuperAdmin() {
                       <td>
                         <button 
                           className="btn-secondary" 
-                          style={{ padding: '6px 12px', height: 'auto', fontSize: '12px' }}
+                          style={{ padding: '6px 12px', height: 'auto', fontSize: '11px', whiteSpace: 'nowrap' }}
+                          onClick={() => editWebhook(ass.id, ass.n8n_webhook_url)}
+                          title={ass.n8n_webhook_url}
+                        >
+                          <i className="fa-solid fa-link" style={{ marginRight: '6px' }}></i> 
+                          {ass.n8n_webhook_url ? 'Editar' : 'Adicionar'}
+                        </button>
+                      </td>
+                      <td>
+                        <button 
+                          className="btn-secondary" 
+                          style={{ padding: '6px 12px', height: 'auto', fontSize: '12px', whiteSpace: 'nowrap' }}
                           onClick={() => toggleStatus(ass.id, ass.status_plano)}
                           disabled={ass.id === currentUserId}
                         >
