@@ -29,3 +29,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test and diagnostics scripts
+test*.js
+test_*.js
+debug.cjs
+
