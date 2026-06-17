@@ -46,7 +46,7 @@ function BookingPage() {
             document.documentElement.style.removeProperty('--primary-color');
           }
 
-          const { data: srvs } = await supabase.from('servicos').select('*').eq('assinante_id', storeData.id);
+          const { data: srvs } = await supabase.from('servicos').select('*').eq('user_id', storeData.id);
           if (srvs) {
             setServicos(srvs);
             if (srvs.length > 0 && !searchParams.get('servicoId')) {
@@ -76,7 +76,7 @@ function BookingPage() {
       const { data: agendamentosDia } = await supabase
         .from('agendamentos')
         .select('data_hora, servico_id')
-        .eq('assinante_id', loja.id)
+        .eq('user_id', loja.id)
         .gte('data_hora', startOfDay)
         .lte('data_hora', endOfDay);
 
@@ -141,14 +141,14 @@ function BookingPage() {
       const { data: exCliente } = await supabase
         .from('clientes')
         .select('id')
-        .eq('assinante_id', loja.id)
+        .eq('user_id', loja.id)
         .eq('celular', cleanCelular)
         .single();
 
       let finalClienteId = null;
       if (!exCliente) {
         const novoCli = {
-          assinante_id: loja.id,
+          user_id: loja.id,
           nome,
           celular: cleanCelular,
           veiculos: [{ modelo: veiculo, placa: placa.toUpperCase() }],
@@ -164,7 +164,7 @@ function BookingPage() {
       const dataHoraIso = new Date(`${dataSelecionada}T${horarioSelecionado}:00`).toISOString();
 
       const novoAgendamento = {
-        assinante_id: loja.id,
+        user_id: loja.id,
         cliente_id: finalClienteId,
         servico_id: servicoId,
         data_hora: dataHoraIso,
@@ -257,3 +257,4 @@ function BookingPage() {
 }
 
 export default BookingPage;
+
