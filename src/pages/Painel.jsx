@@ -536,10 +536,14 @@ function Painel() {
 
     if (!text) return; // Se não for ready ou progress, não avisa
 
+    const rawCelular = a.celular_cliente || '';
+    const cleanCelular = rawCelular.replace(/\D/g, '');
+    const phoneWithCountry = cleanCelular.startsWith('55') ? cleanCelular : `55${cleanCelular || '11999999999'}`;
+
     const payload = {
       event: `status_${a.status}`,
       client_name: a.cliente_nome,
-      client_phone: `55${a.celular_cliente || '11999999999'}`,
+      client_phone: phoneWithCountry,
       vehicle: a.veiculo_modelo,
       plate: a.placa,
       service: servicoNome,
@@ -548,18 +552,23 @@ function Painel() {
       message_text: text
     };
 
-    try {
-      // Dispara para o webhook de produção do n8n do usuário
-      await fetch('http://localhost:5678/webhook/webhook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      // Toast de aviso ou silent fail (já que é webhook)
-      console.log('Notificação enviada ao n8n com sucesso!');
-    } catch (err) {
-      console.error('Erro ao disparar webhook do n8n:', err);
-      // Fallback para o modo antigo caso o docker n8n esteja fora do ar
+    if (assinanteAuth?.nome_plano === 'vip') {
+      try {
+        // Dispara para o webhook de produção do n8n do usuário VIP
+        await fetch('http://localhost:5678/webhook/webhook', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        console.log('Notificação enviada ao n8n com sucesso!');
+      } catch (err) {
+        console.error('Erro ao disparar webhook do n8n:', err);
+        // Fallback
+        const url = `https://api.whatsapp.com/send?phone=${payload.client_phone}&text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+      }
+    } else {
+      // Para Start e Pro, abre o WhatsApp Web direto (não tem n8n integrado)
       const url = `https://api.whatsapp.com/send?phone=${payload.client_phone}&text=${encodeURIComponent(text)}`;
       window.open(url, '_blank');
     }

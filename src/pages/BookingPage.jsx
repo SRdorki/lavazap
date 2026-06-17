@@ -16,14 +16,14 @@ function BookingPage() {
   const [nome, setNome] = useState(searchParams.get('nome') || '');
   const [celular, setCelular] = useState(searchParams.get('celular') || '');
   const [placa, setPlaca] = useState(searchParams.get('placa') || '');
-  const [veiculo, setVeiculo] = useState(searchParams.get('veiculo') || '');
+  const [veiculo, setVeiculo] = useState(searchParams.get('veiculo') || searchParams.get('modelo') || '');
   const [servicoId, setServicoId] = useState(searchParams.get('servicoId') || '');
-  const getDefaultFormHorario = () => {
-    const d = new Date();
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    return d.toISOString().slice(0, 16);
-  };
-  const [dataHora, setDataHora] = useState(getDefaultFormHorario());
+  
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [dataSelecionada, setDataSelecionada] = useState(searchParams.get('data') || todayStr);
+  const [horarioSelecionado, setHorarioSelecionado] = useState('');
+  
+  const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
   const [sucesso, setSucesso] = useState(false);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ function BookingPage() {
             document.documentElement.style.removeProperty('--primary-color');
           }
 
-          const { data: srvs } = await supabase.from('servicos').select('*');
+          const { data: srvs } = await supabase.from('servicos').select('*').eq('assinante_id', storeData.id);
           if (srvs) {
             setServicos(srvs);
             if (srvs.length > 0 && !searchParams.get('servicoId')) {
@@ -65,23 +65,116 @@ function BookingPage() {
     return () => document.documentElement.style.removeProperty('--primary-color');
   }, [slug]);
 
+  // Load Availability
+  useEffect(() => {
+    if (!loja || !dataSelecionada || !servicoId || servicos.length === 0) return;
+
+    async function loadAvailability() {
+      const startOfDay = new Date(`${dataSelecionada}T00:00:00`).toISOString();
+      const endOfDay = new Date(`${dataSelecionada}T23:59:59`).toISOString();
+
+      const { data: agendamentosDia } = await supabase
+        .from('agendamentos')
+        .select('data_hora, servico_id')
+        .eq('assinante_id', loja.id)
+        .gte('data_hora', startOfDay)
+        .lte('data_hora', endOfDay);
+
+      const servicoSelecionado = servicos.find(s => s.id === servicoId);
+      const duracaoMinutos = servicoSelecionado ? servicoSelecionado.duracao : 60;
+
+      const slots = [];
+      const inicioExpediente = 8 * 60; // 08:00
+      const fimExpediente = 18 * 60; // 18:00
+
+      for (let min = inicioExpediente; min <= fimExpediente; min += 30) {
+        const slotStart = min;
+        const slotEnd = min + duracaoMinutos;
+
+        if (slotEnd > fimExpediente) continue;
+
+        let conflito = false;
+        if (agendamentosDia) {
+          for (let ag of agendamentosDia) {
+            const agDate = new Date(ag.data_hora);
+            const agStartMin = agDate.getHours() * 60 + agDate.getMinutes();
+            
+            const agServico = servicos.find(s => s.id === ag.servico_id);
+            const agDuracao = agServico ? agServico.duracao : 60;
+            const agEndMin = agStartMin + agDuracao;
+
+            // Intersecção de horários: StartA < EndB AND EndA > StartB
+            if (slotStart < agEndMin && slotEnd > agStartMin) {
+              conflito = true;
+              break;
+            }
+          }
+        }
+
+        if (!conflito) {
+          const hours = Math.floor(min / 60).toString().padStart(2, '0');
+          const minutes = (min % 60).toString().padStart(2, '0');
+          slots.push(`${hours}:${minutes}`);
+        }
+      }
+
+      setHorariosDisponiveis(slots);
+      setHorarioSelecionado('');
+    }
+
+    loadAvailability();
+  }, [dataSelecionada, servicoId, loja, servicos]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!loja) return;
+    if (!horarioSelecionado) {
+      alert("Por favor, selecione um horário disponível.");
+      return;
+    }
 
     try {
       const precoServico = servicos.find(s => s.id === servicoId)?.preco || 0;
+      const cleanCelular = celular.replace(/\D/g, '');
+
+      // CRM: Cadastra ou Atualiza Cliente
+      const { data: exCliente } = await supabase
+        .from('clientes')
+        .select('id')
+        .eq('assinante_id', loja.id)
+        .eq('celular', cleanCelular)
+        .single();
+
+      let finalClienteId = null;
+      if (!exCliente) {
+        const novoCli = {
+          assinante_id: loja.id,
+          nome,
+          celular: cleanCelular,
+          veiculos: [{ modelo: veiculo, placa: placa.toUpperCase() }],
+          total_gasto: 0,
+          lavagens: 0
+        };
+        const { data: insertedCli } = await supabase.from('clientes').insert(novoCli).select().single();
+        if (insertedCli) finalClienteId = insertedCli.id;
+      } else {
+        finalClienteId = exCliente.id;
+      }
+
+      const dataHoraIso = new Date(`${dataSelecionada}T${horarioSelecionado}:00`).toISOString();
 
       const novoAgendamento = {
+        assinante_id: loja.id,
+        cliente_id: finalClienteId,
         servico_id: servicoId,
-        data_hora: new Date(dataHora).toISOString(),
+        data_hora: dataHoraIso,
         status: 'waiting',
         pago: false,
         valor_total: precoServico,
         placa: placa.toUpperCase(),
         cliente_nome: nome,
         veiculo_modelo: veiculo,
-        celular_cliente: celular.replace(/\D/g, '')
+        celular_cliente: cleanCelular
       };
 
       const { error } = await supabase.from('agendamentos').insert(novoAgendamento);
@@ -112,6 +205,7 @@ function BookingPage() {
         {sucesso ? (
           <div className="booking-success">
             <h2>Agendamento Confirmado!</h2>
+            <p>Seu horário foi reservado com sucesso e os dados salvos em nosso sistema.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="booking-form">
@@ -127,11 +221,34 @@ function BookingPage() {
             </div>
             
             <div className="form-group">
-              <label>Data e Horário desejado</label>
-              <input type="datetime-local" required value={dataHora} onChange={e => setDataHora(e.target.value)} />
+              <label>Data Desejada</label>
+              <input type="date" required value={dataSelecionada} onChange={e => setDataSelecionada(e.target.value)} min={todayStr} />
             </div>
 
-            <button type="submit" className="btn-primary booking-submit">Confirmar Horário</button>
+            <div className="form-group">
+              <label>Horários Disponíveis</label>
+              {horariosDisponiveis.length > 0 ? (
+                <div className="time-slots-grid">
+                  {horariosDisponiveis.map(slot => (
+                    <div 
+                      key={slot} 
+                      className={`time-slot ${horarioSelecionado === slot ? 'selected' : ''}`}
+                      onClick={() => setHorarioSelecionado(slot)}
+                    >
+                      {slot}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-slots">
+                  Nenhum horário disponível para a duração deste serviço na data selecionada.
+                </div>
+              )}
+            </div>
+
+            <button type="submit" className="btn-primary booking-submit" disabled={!horarioSelecionado}>
+              Confirmar Horário
+            </button>
           </form>
         )}
       </div>
