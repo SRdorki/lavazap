@@ -46,7 +46,11 @@ function BookingPage() {
             document.documentElement.style.removeProperty('--primary-color');
           }
 
-          const { data: srvs } = await supabase.from('servicos').select('*').eq('user_id', storeData.id);
+          const { data: srvs, error: srvsErr } = await supabase.from('servicos').select('*').eq('user_id', storeData.id);
+          console.log("LOG DEBUG BookingPage -> storeData.id:", storeData.id);
+          console.log("LOG DEBUG BookingPage -> srvs:", srvs);
+          console.log("LOG DEBUG BookingPage -> srvsErr:", srvsErr);
+          
           if (srvs) {
             setServicos(srvs);
             if (srvs.length > 0 && !searchParams.get('servicoId')) {
