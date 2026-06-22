@@ -5,7 +5,7 @@ import { createPaymentLink } from '../mercadoPago'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 const STRIPE_LINK_START = import.meta.env.VITE_STRIPE_LINK_START || '#'
-const STRIPE_LINK_PREMIUM = import.meta.env.VITE_STRIPE_LINK_PREMIUM || '#'
+const STRIPE_LINK_PREMIUM = import.meta.env.VITE_STRIPE_LINK_PROFISSIONAL || '#'
 const STRIPE_LINK_VIP = import.meta.env.VITE_STRIPE_LINK_VIP || '#'
 
 // Agora usamos a data real do sistema
@@ -711,7 +711,7 @@ function Painel() {
 
   // Serviços Actions
   const handleAddServico = async () => {
-    const checklistPadrao = 'Lavagem Externa\\nAspiração Interna\\nHigienização de Painel\\nAcabamento nos Pneus (Pretinho)';
+    const checklistPadrao = 'Lavagem Externa\nAspiração Interna\nHigienização de Painel\nAcabamento nos Pneus (Pretinho)';
     const newServico = { nome: 'Novo Serviço', preco: 0, duracao: 30, checklist: checklistPadrao, user_id: assinanteAuth.id };
     const { data: inserted, error } = await supabase.from('servicos').insert(newServico).select().single()
     if (!error && inserted) {
@@ -1796,7 +1796,7 @@ function Painel() {
                         <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
                           <strong style={{ display: 'block', marginBottom: '8px', color: 'var(--text-primary)' }}>Checklist do Serviço:</strong>
                           <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            {s.checklist.split('\n').filter(Boolean).map((item, idx) => (
+                            {s.checklist.split(/\\n|\n/).filter(Boolean).map((item, idx) => (
                               <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <i className="fa-solid fa-check" style={{ color: 'var(--accent-cyan)' }}></i> {item}
                               </li>
@@ -2528,8 +2528,8 @@ function Painel() {
                   <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Agendamentos Ilimitados</li>
                   <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Suporte Prioritário VIP</li>
                 </ul>
-                <a href={`${STRIPE_LINK_VIP}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-primary" style={{ display: 'block', textAlign: 'center', padding: '10px', textDecoration: 'none', width: '100%', fontSize: '13px', fontWeight: 'bold', backgroundColor: '#E63946', borderColor: '#E63946' }}>
-                  Assinar IA VIP
+                <a href={`https://wa.me/5511913151641?text=${encodeURIComponent('Olá! Acabei de assinar o Plano IA VIP do LavaZap e gostaria de iniciar a implantação! Meu email: ' + (assinanteAuth?.email || ''))}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'block', textAlign: 'center', padding: '10px', textDecoration: 'none', width: '100%', fontSize: '13px', fontWeight: 'bold', backgroundColor: '#E63946', borderColor: '#E63946' }}>
+                  Falar com Especialista <i className="fa-brands fa-whatsapp" style={{ marginLeft: '6px' }}></i>
                 </a>
               </div>
             </div>

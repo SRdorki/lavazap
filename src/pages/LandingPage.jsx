@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
 import imgFelipe from '../assets/social/Felipe.png';
@@ -54,6 +54,7 @@ export default function LandingPage() {
                     <div className="nav-links">
                         <a href="#features">Recursos</a>
                         <a href="#pricing">Planos</a>
+                        <a href="#faq">FAQ</a>
                     </div>
                     <Link to="/login" className="lp-btn lp-btn-primary">Criar Conta</Link>
                 </div>
@@ -362,6 +363,8 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            <FaqSection />
+
             <footer className="footer">
                 <div className="section-container text-center">
                     <h2>Teste o Plano Start por 7 dias grátis.</h2>
@@ -403,3 +406,68 @@ export default function LandingPage() {
         </div>
     );
 }
+
+const faqData = [
+    {
+        q: 'Preciso saber programar para usar o LavaZap?',
+        a: 'Não! O sistema foi pensado para donos de lava-rápido que não têm experiência com tecnologia. Basta criar sua conta, cadastrar os serviços e pronto. É tão simples quanto usar o WhatsApp.'
+    },
+    {
+        q: 'Como funciona o período de teste grátis?',
+        a: 'Ao assinar o Plano Start, você ganha 7 dias gratuitos para testar todas as funcionalidades sem compromisso. Se não gostar, pode cancelar antes do fim do período sem pagar nada.'
+    },
+    {
+        q: 'O LavaZap cobra comissão sobre os agendamentos?',
+        a: 'Não, nunca. Você paga apenas a mensalidade fixa do plano escolhido. 100% do valor de cada lavagem vai direto para o seu caixa, sem intermediários e sem taxas por transação.'
+    },
+    {
+        q: 'Como o Assistente Virtual do Plano VIP funciona?',
+        a: 'No Plano IA VIP, nossa equipe instala e configura um Assistente com Inteligência Artificial no seu WhatsApp. Ele responde clientes automaticamente, mostra horários disponíveis e fecha agendamentos — 24 horas por dia, inclusive de madrugada.'
+    },
+    {
+        q: 'Posso personalizar a página de agendamento com a minha marca?',
+        a: 'Sim! A partir do Plano Profissional, você desbloqueia o Whitelabel completo: logotipo, cores e endereço exclusivo (ex: lavazap.site/suamarca). Seu cliente nunca verá a marca LavaZap.'
+    },
+    {
+        q: 'E se eu quiser cancelar?',
+        a: 'Você pode cancelar a qualquer momento direto pela sua área de pagamentos, sem burocracia. Não há multa nem fidelidade. Cancelou, o acesso segue ativo até o fim do período já pago.'
+    }
+];
+
+function FaqSection() {
+    const [openIndex, setOpenIndex] = useState(null);
+
+    const toggle = (idx) => {
+        setOpenIndex(prev => prev === idx ? null : idx);
+    };
+
+    return (
+        <section className="faq-section" id="faq">
+            <div className="section-container">
+                <div className="section-header text-center">
+                    <h2 className="section-title">Perguntas Frequentes</h2>
+                    <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto' }}>
+                        Tudo o que você precisa saber antes de automatizar o seu lava-rápido.
+                    </p>
+                </div>
+
+                <div className="faq-list">
+                    {faqData.map((item, idx) => (
+                        <div key={idx} className={`faq-item${openIndex === idx ? ' open' : ''}`}>
+                            <button className="faq-question" onClick={() => toggle(idx)}>
+                                <span>{item.q}</span>
+                                <i className="fa-solid fa-plus faq-icon"></i>
+                            </button>
+                            <div className="faq-answer">
+                                <div className="faq-answer-inner">
+                                    {item.a}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+

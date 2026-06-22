@@ -956,3 +956,104 @@
     text-align: center;
     margin-bottom: 40px;
 }
+
+/* --- FAQ Section --- */
+.faq-section {
+    border-top: 1px solid var(--glass-border);
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 180, 216, 0.03) 50%, transparent 100%);
+}
+
+.faq-list {
+    max-width: 800px;
+    margin: 40px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.faq-item {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.faq-item:hover {
+    border-color: rgba(0, 180, 216, 0.25);
+}
+
+.faq-item.open {
+    border-color: rgba(0, 180, 216, 0.3);
+    box-shadow: 0 4px 24px rgba(0, 180, 216, 0.08);
+}
+
+.faq-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: none;
+    border: none;
+    color: var(--text-white);
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--font-heading);
+    cursor: pointer;
+    text-align: left;
+    gap: 16px;
+    transition: color 0.3s ease;
+}
+
+@media (min-width: 900px) {
+    .faq-question {
+        padding: 24px 32px;
+        font-size: 1.1rem;
+    }
+}
+
+.faq-question:hover {
+    color: var(--accent-cyan);
+}
+
+.faq-icon {
+    font-size: 1.25rem;
+    color: var(--accent-cyan);
+    transition: transform 0.3s var(--ease-smooth);
+    flex-shrink: 0;
+}
+
+.faq-item.open .faq-icon {
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s var(--ease-smooth), padding 0.3s ease;
+}
+
+.faq-item.open .faq-answer {
+    max-height: 300px;
+}
+
+.faq-answer-inner {
+    padding: 0 24px 20px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 16px;
+}
+
+@media (min-width: 900px) {
+    .faq-answer-inner {
+        padding: 0 32px 24px;
+        padding-top: 20px;
+        font-size: 1rem;
+    }
+}
+

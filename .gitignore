@@ -35,3 +35,16 @@ test*.js
 test_*.js
 debug.cjs
 
+# Vercel
+.vercel/
+
+# Supabase
+.supabase/
+supabase/.temp/
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
