@@ -41,6 +41,7 @@ debug.cjs
 # Supabase
 .supabase/
 supabase/.temp/
+supabase/functions/stripe-webhook/
 
 # Testing
 coverage/
