@@ -347,8 +347,8 @@ export default function LandingPage() {
                         </div>
 
                         <div className="bento-card pricing-card">
-                            <div className="plan-name">Plano IA VIP</div>
-                            <div className="plan-price">R$ <span className="number">297</span><span className="period">/mês</span></div>
+                            <div className="plan-name">Plano Personalizado</div>
+                            <div className="plan-price" style={{ fontSize: '1.5rem', marginTop: '10px', marginBottom: '10px' }}>Sob Consulta</div>
                             <p className="plan-desc">O seu WhatsApp no Piloto Automático.</p>
                             <ul className="plan-features">
                                 <li>Tudo do Plano Profissional</li>
@@ -357,7 +357,7 @@ export default function LandingPage() {
                                 <li>Fluxos de conversas customizados</li>
                                 <li>Treinamento da IA com seus dados</li>
                             </ul>
-                            <a href="https://wa.me/5511913151641?text=Ol%C3%A1%21%20Gostaria%20de%20saber%20mais%20sobre%20o%20Plano%20VIP%20do%20LavaZap%21" target="_blank" rel="noreferrer" className="lp-btn lp-btn-secondary lp-btn-block">Falar com Consultor</a>
+                            <a href="https://wa.me/5511913151641?text=Ol%C3%A1%21%20Gostaria%20de%20saber%20mais%20sobre%20o%20Plano%20Personalizado%20do%20LavaZap%21" target="_blank" rel="noreferrer" className="lp-btn lp-btn-secondary lp-btn-block">Falar com Consultor</a>
                         </div>
                     </div>
                 </div>
@@ -421,8 +421,8 @@ const faqData = [
         a: 'Não, nunca. Você paga apenas a mensalidade fixa do plano escolhido. 100% do valor de cada lavagem vai direto para o seu caixa, sem intermediários e sem taxas por transação.'
     },
     {
-        q: 'Como o Assistente Virtual do Plano VIP funciona?',
-        a: 'No Plano IA VIP, nossa equipe instala e configura um Assistente com Inteligência Artificial no seu WhatsApp. Ele responde clientes automaticamente, mostra horários disponíveis e fecha agendamentos — 24 horas por dia, inclusive de madrugada.'
+        q: 'Como o Assistente Virtual do Plano Personalizado funciona?',
+        a: 'No Plano Personalizado, nossa equipe instala e configura um Assistente com Inteligência Artificial no seu WhatsApp. Ele responde clientes automaticamente, mostra horários disponíveis e fecha agendamentos — 24 horas por dia, inclusive de madrugada.'
     },
     {
         q: 'Posso personalizar a página de agendamento com a minha marca?',

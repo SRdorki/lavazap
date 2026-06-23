@@ -177,10 +177,17 @@ function Painel() {
             }
             
             // Check Subscription
-            if (myUser.status_plano === 'inativo' || myUser.status_plano === 'pendente_pagamento') {
-              setSubscriptionMessage('Você precisa iniciar o seu teste grátis para acessar o painel.');
+            if (myUser.status_plano === 'cancelado') {
+              setSubscriptionMessage('Sua conta foi cancelada. Entre em contato com o suporte.');
               setShowSubscriptionBlock(true);
-            } else if (myUser.status_plano === 'trial') {
+            } else if (['inativo', 'pendente_pagamento', 'pendente'].includes(myUser.status_plano)) {
+              if (myUser.status_plano === 'pendente') {
+                setSubscriptionMessage('Seu período de teste expirou. Escolha um plano abaixo para continuar.');
+              } else {
+                setSubscriptionMessage('Você precisa iniciar ou regularizar sua assinatura para acessar o painel.');
+              }
+              setShowSubscriptionBlock(true);
+            } else {
               if (myUser.plano_expira_em) {
                 const expDate = new Date(myUser.plano_expira_em);
                 if (new Date() > expDate) {
@@ -511,7 +518,7 @@ function Painel() {
 
   // Notificação Automática e Silenciosa via n8n
   const handleSendWhatsAppNotification = async (a) => {
-    // Apenas se for "Plano VIP" ou "Plano Profissional" o sistema vai avisar sozinho
+    // Apenas se for "Plano Personalizado" ou "Plano Profissional" o sistema vai avisar sozinho
     // Para fins do MVP, vamos disparar o webhook para todos e o n8n decide o fluxo
 
     const servicoObj = servicos.find(s => s.id === a.servico_id);
@@ -2197,7 +2204,7 @@ function Painel() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
                   Configure a sua página pública onde os clientes poderão realizar agendamentos. 
-                  Nos planos Profissional e VIP você pode alterar a cor de fundo e inserir sua logomarca.
+                  Nos planos Profissional e Personalizado você pode alterar a cor de fundo e inserir sua logomarca.
                 </p>
                 
                 <div className="form-group" style={{ marginBottom: 0 }}>
@@ -2233,7 +2240,7 @@ function Painel() {
                       disabled={assinanteAuth?.nome_plano === 'start'}
                       style={{ height: '40px', padding: '2px', cursor: assinanteAuth?.nome_plano === 'start' ? 'not-allowed' : 'pointer' }}
                     />
-                    {assinanteAuth?.nome_plano === 'start' && <span style={{ fontSize: '11px', color: 'var(--status-cancelled)' }}>Exclusivo Profissional/VIP</span>}
+                    {assinanteAuth?.nome_plano === 'start' && <span style={{ fontSize: '11px', color: 'var(--status-cancelled)' }}>Exclusivo Profissional/Personalizado</span>}
                   </div>
                   <div className="form-group" style={{ flex: 2, minWidth: '250px' }}>
                     <label className="form-label">Logomarca (Imagem)</label>
@@ -2258,7 +2265,7 @@ function Painel() {
                         />
                       </label>
                     </div>
-                    {assinanteAuth?.nome_plano === 'start' && <span style={{ fontSize: '11px', color: 'var(--status-cancelled)' }}>Exclusivo Profissional/VIP</span>}
+                    {assinanteAuth?.nome_plano === 'start' && <span style={{ fontSize: '11px', color: 'var(--status-cancelled)' }}>Exclusivo Profissional/Personalizado</span>}
                     {formWhitelabelLogo && (
                       <div style={{ marginTop: '10px' }}>
                         <img src={formWhitelabelLogo} alt="Logo Preview" style={{ maxHeight: '60px', borderRadius: '4px' }} />
@@ -2479,60 +2486,156 @@ function Painel() {
           backdropFilter: 'blur(10px)',
           padding: '20px'
         }}>
-          <div className="glass-card" style={{ width: '100%', maxWidth: '800px', padding: '40px', borderRadius: '16px', textAlign: 'center', animation: 'fadeInUp 0.5s ease-out', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ width: '60px', height: '60px', backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
-              <i className="fa-solid fa-lock" style={{ color: 'var(--status-cancelled)', fontSize: '24px' }}></i>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '1100px', padding: '48px', borderRadius: '24px', textAlign: 'center', animation: 'fadeInUp 0.5s ease-out', maxHeight: '95vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
+            
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', backgroundColor: 'rgba(0, 180, 216, 0.1)', border: '1px solid rgba(0, 180, 216, 0.2)', borderRadius: '20px', color: 'var(--accent-cyan)', fontSize: '12px', fontWeight: '700', marginBottom: '24px' }}>
+              <i className="fa-solid fa-lock"></i>
+              Acesso Restrito
             </div>
-            <h2 style={{ marginBottom: '16px', color: 'var(--text-primary)', fontSize: '24px', fontWeight: '700' }}>Assinatura Necessária 🛑</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.6', fontSize: '15px' }}>
-              {subscriptionMessage} Escolha um plano abaixo para liberar o sistema. O Plano Start possui <strong>7 dias grátis de teste</strong>.
+            
+            <h2 style={{ marginBottom: '16px', color: 'var(--text-primary)', fontSize: '36px', fontWeight: '800', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+              {assinanteAuth?.status_plano === 'cancelado' 
+                ? 'Conta Cancelada' 
+                : <>Escolha o plano ideal<br/>para o seu negócio</>
+              }
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '40px', lineHeight: '1.6', fontSize: '16px', maxWidth: '600px', margin: '0 auto 40px auto' }}>
+              {subscriptionMessage} {assinanteAuth?.status_plano !== 'cancelado' && <span>O Plano Start possui <strong>7 dias grátis de teste</strong>.</span>}
             </p>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '24px', textAlign: 'left' }}>
-              {/* Start Plan */}
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column' }}>
-                <h3 style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--text-primary)' }}>Plano Start</h3>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px', color: 'var(--text-primary)' }}>R$ 97<span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>/mês</span></div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', fontSize: '13px', color: 'var(--text-secondary)', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Página Pública Padrão</li>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Painel de Gestão / Agenda</li>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Até 150 agendamentos/mês</li>
-                </ul>
-                <a href={`${STRIPE_LINK_START}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-secondary" style={{ display: 'block', textAlign: 'center', padding: '10px', textDecoration: 'none', width: '100%', fontSize: '13px', fontWeight: 'bold' }}>
-                  Assinar Start (7 Dias Grátis)
-                </a>
-              </div>
-              
-              {/* Profissional Plan */}
-              <div style={{ backgroundColor: 'rgba(0,180,216,0.05)', border: '1px solid var(--accent-cyan)', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '-10px', right: '16px', backgroundColor: 'var(--accent-cyan)', color: '#fff', fontSize: '10px', fontWeight: 'bold', padding: '2px 8px', borderRadius: '20px' }}>Mais Escolhido</div>
-                <h3 style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--accent-cyan)' }}>Profissional</h3>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px', color: 'var(--text-primary)' }}>R$ 197<span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>/mês</span></div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', fontSize: '13px', color: 'var(--text-secondary)', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Whitelabel (Cores e Logo)</li>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Google Calendar Sync</li>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Até 500 agendamentos/mês</li>
-                </ul>
-                <a href={`${STRIPE_LINK_PREMIUM}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-primary" style={{ display: 'block', textAlign: 'center', padding: '10px', textDecoration: 'none', width: '100%', fontSize: '13px', fontWeight: 'bold' }}>
-                  Assinar Profissional
-                </a>
-              </div>
+            {assinanteAuth?.status_plano !== 'cancelado' && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px', textAlign: 'left' }}>
+                {/* Start Plan */}
+                <div style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.15), transparent)', pointerEvents: 'none' }}></div>
+                  
+                  <div style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', flex: 1, zIndex: 1 }}>
+                    <div style={{ marginBottom: '24px', color: '#3B82F6' }}>
+                      <i className="fa-solid fa-paper-plane" style={{ fontSize: '28px' }}></i>
+                    </div>
+                    
+                    <div style={{ marginBottom: '24px' }}>
+                      <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>Plano Start</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Para começar a organizar sua agenda</p>
+                    </div>
 
-              {/* VIP Plan */}
-              <div style={{ backgroundColor: 'rgba(230,57,70,0.05)', border: '1px solid #E63946', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '-10px', right: '16px', backgroundColor: '#E63946', color: '#fff', fontSize: '10px', fontWeight: 'bold', padding: '2px 8px', borderRadius: '20px' }}>Exclusivo</div>
-                <h3 style={{ fontSize: '16px', marginBottom: '8px', color: '#E63946' }}>IA VIP</h3>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px', color: 'var(--text-primary)' }}>R$ 297<span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>/mês</span></div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', fontSize: '13px', color: 'var(--text-secondary)', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Assistente IA de Agendamento</li>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Agendamentos Ilimitados</li>
-                  <li><i className="fa-solid fa-check text-cyan" style={{ marginRight: '8px' }}></i>Suporte Prioritário VIP</li>
-                </ul>
-                <a href={`https://wa.me/5511913151641?text=${encodeURIComponent('Olá! Acabei de assinar o Plano IA VIP do LavaZap e gostaria de iniciar a implantação! Meu email: ' + (assinanteAuth?.email || ''))}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'block', textAlign: 'center', padding: '10px', textDecoration: 'none', width: '100%', fontSize: '13px', fontWeight: 'bold', backgroundColor: '#E63946', borderColor: '#E63946' }}>
-                  Falar com Especialista <i className="fa-brands fa-whatsapp" style={{ marginLeft: '6px' }}></i>
-                </a>
+                    <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <span style={{ fontSize: '32px', fontWeight: '800', color: 'var(--text-primary)' }}>R$ 97</span>
+                      <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>/mês</span>
+                    </div>
+
+                    <a href={`${STRIPE_LINK_START}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-secondary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', borderColor: 'rgba(255,255,255,0.1)' }}>
+                      Assinar Start (7 Dias Grátis)
+                    </a>
+
+                    <div style={{ marginTop: 'auto' }}>
+                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#3B82F6', marginBottom: '16px' }}>O Que Está Incluso:</p>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: '#3B82F6', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Página Pública Padrão</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: '#3B82F6', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Painel de Gestão / Agenda</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: '#3B82F6', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Até 150 agendamentos/mês</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Personalizado Plan */}
+                <div style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid #A855F7', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', transform: 'scale(1.02)', boxShadow: '0 10px 40px rgba(168, 85, 247, 0.15)' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(168, 85, 247, 0.2), transparent)', pointerEvents: 'none' }}></div>
+                  
+                  <div style={{ position: 'absolute', top: '24px', right: '24px', backgroundColor: '#A855F7', color: '#fff', fontSize: '11px', fontWeight: 'bold', padding: '4px 12px', borderRadius: '20px' }}>Mais Escolhido</div>
+
+                  <div style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', flex: 1, zIndex: 1 }}>
+                    <div style={{ marginBottom: '24px', color: '#A855F7' }}>
+                      <i className="fa-solid fa-building" style={{ fontSize: '28px' }}></i>
+                    </div>
+                    
+                    <div style={{ marginBottom: '24px' }}>
+                      <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>Personalizado</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Controle total e automação</p>
+                    </div>
+
+                    <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <span style={{ fontSize: '32px', fontWeight: '800', color: 'var(--text-primary)' }}>Sob Consulta</span>
+                    </div>
+
+                    <a href={`https://wa.me/5511913151641?text=${encodeURIComponent('Olá! Gostaria de saber mais sobre o Plano Personalizado do LavaZap! Meu email: ' + (assinanteAuth?.email || ''))}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', backgroundColor: '#A855F7', borderColor: '#A855F7' }}>
+                      Falar com Especialista <i className="fa-brands fa-whatsapp" style={{ marginLeft: '8px' }}></i>
+                    </a>
+
+                    <div style={{ marginTop: 'auto' }}>
+                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#A855F7', marginBottom: '16px' }}>Tudo do Profissional, Mais:</p>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: '#A855F7', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Assistente IA de Agendamento</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: '#A855F7', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Agendamentos Ilimitados</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: '#A855F7', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Suporte Prioritário</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profissional Plan */}
+                <div style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(0, 180, 216, 0.15), transparent)', pointerEvents: 'none' }}></div>
+                  
+                  <div style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', flex: 1, zIndex: 1 }}>
+                    <div style={{ marginBottom: '24px', color: 'var(--accent-cyan)' }}>
+                      <i className="fa-solid fa-rocket" style={{ fontSize: '28px' }}></i>
+                    </div>
+                    
+                    <div style={{ marginBottom: '24px' }}>
+                      <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>Profissional</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Para operações em crescimento</p>
+                    </div>
+
+                    <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <span style={{ fontSize: '32px', fontWeight: '800', color: 'var(--text-primary)' }}>R$ 197</span>
+                      <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>/mês</span>
+                    </div>
+
+                    <a href={`${STRIPE_LINK_PREMIUM}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-secondary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', borderColor: 'rgba(255,255,255,0.1)' }}>
+                      Assinar Profissional
+                    </a>
+
+                    <div style={{ marginTop: 'auto' }}>
+                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--accent-cyan)', marginBottom: '16px' }}>Tudo do Start, Mais:</p>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: 'var(--accent-cyan)', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Whitelabel (Cores e Logo)</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: 'var(--accent-cyan)', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Google Calendar Sync</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                          <i className="fa-solid fa-check" style={{ color: 'var(--accent-cyan)', marginTop: '3px', fontSize: '14px' }}></i>
+                          <span>Até 500 agendamentos/mês</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
             
             <button type="button" className="btn-secondary" onClick={handleLogout} style={{ fontWeight: 'bold', color: 'var(--text-secondary)', borderColor: 'transparent', backgroundColor: 'transparent' }} title="Sair da conta">
               <i className="fa-solid fa-arrow-right-from-bracket"></i> Sair da Conta
