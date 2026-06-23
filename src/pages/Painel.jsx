@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { initGapiClient, initGisClient, requestAccessToken, revokeToken, isAuthenticated, createCalendarEvent, listCalendarEvents } from '../googleCalendar'
 import { supabase } from '../supabaseClient'
 import { createPaymentLink } from '../mercadoPago'
+import renewCredentialsImg from '../assets/renew-credentials-pt.jpg'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 const STRIPE_LINK_START = import.meta.env.VITE_STRIPE_LINK_START || '#'
@@ -30,10 +32,11 @@ function Painel() {
   const [editCliCelular, setEditCliCelular] = useState('')
   const [editCliVeiculo, setEditCliVeiculo] = useState('')
   const [editCliPlaca, setEditCliPlaca] = useState('')
-  const [filtroPeriodo, setFiltroPeriodo] = useState('este_mes')
+  const [filtroPeriodo, setFiltroPeriodo] = useState('hoje')
   const [pesquisa, setPesquisa] = useState('')
   const [pesquisaCliente, setPesquisaCliente] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isMpHelpModalOpen, setIsMpHelpModalOpen] = useState(false)
   const [selectedCards, setSelectedCards] = useState([])
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -433,6 +436,39 @@ function Painel() {
     metric1Value = concluidosGeral.reduce((acc, curr) => acc + Number(curr.valor_total), 0);
     metric2Value = metric1Value > 0 ? metric1Value / 2 : 0; // Aproximação de 2 meses no MVP
   }
+
+  // Dados para o Gráfico de Faturamento (Últimos 7 dias)
+  const getChartData = () => {
+    const data = [];
+    const hojeData = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(hojeData);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      
+      const fatDoDia = agendamentos
+        .filter(a => new Date(a.data_hora).toDateString() === d.toDateString() && a.pago)
+        .reduce((acc, curr) => acc + Number(curr.valor_total), 0);
+        
+      const despDoDia = despesas
+        .filter(desp => {
+          // A data de despesa vem como YYYY-MM-DD
+          const [year, month, day] = desp.data.split('-');
+          const despDate = new Date(year, month - 1, day);
+          return despDate.toDateString() === d.toDateString();
+        })
+        .reduce((acc, curr) => acc + Number(curr.valor), 0);
+        
+      data.push({
+        name: dateStr,
+        Faturamento: fatDoDia,
+        Lucro: fatDoDia - despDoDia,
+        Despesas: despDoDia
+      });
+    }
+    return data;
+  };
+  const chartData = getChartData();
 
   // Cálculo da variação percentual
   const variacaoFaturamento = metric2Value > 0 && filtroPeriodo !== 'todos'
@@ -1487,6 +1523,47 @@ function Painel() {
             </div>
           </div>
         </section>
+
+        {/* Gráfico de Desempenho no Dashboard */}
+        <section style={{ padding: '0 2rem 2rem 2rem' }}>
+          <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', padding: '20px', border: '1px solid var(--border-color)' }}>
+            <h2 style={{ fontSize: '16px', color: 'var(--text-primary)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <i className="fa-solid fa-chart-area" style={{ color: 'var(--accent-cyan)' }}></i> Desempenho Financeiro (Últimos 7 dias)
+            </h2>
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorFat" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#00D2FF" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#3A7BD5" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="colorLucro" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#FF8C00" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#FFA500" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="colorDesp" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#D500F9" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#FF1493" stopOpacity={0.9}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.3} />
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickMargin={10} axisLine={false} tickLine={false} />
+                  <YAxis stroke="var(--text-secondary)" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickFormatter={(value) => `R$ ${value}`} axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                    itemStyle={{ fontWeight: 'bold' }}
+                    formatter={(value, name) => [`R$ ${value}`, name]}
+                    labelStyle={{ color: 'var(--text-secondary)', marginBottom: '4px' }}
+                  />
+                  <Area type="natural" dataKey="Faturamento" stroke="none" fillOpacity={1} fill="url(#colorFat)" />
+                  <Area type="natural" dataKey="Lucro" stroke="none" fillOpacity={1} fill="url(#colorLucro)" />
+                  <Area type="natural" dataKey="Despesas" stroke="none" fillOpacity={1} fill="url(#colorDesp)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </section>
           </>
         )}
 
@@ -2146,9 +2223,9 @@ function Painel() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
                   Conecte sua conta do Mercado Pago para receber pagamentos diretamente na sua conta bancária. 
                   Gere um <strong>Access Token</strong> (Token de Acesso de Produção) no painel de desenvolvedor do Mercado Pago e cole abaixo.{' '}
-                  <a href="https://www.mercadopago.com.br/developers/pt/docs/your-integrations/credentials" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-cyan)', textDecoration: 'none' }}>
+                  <span onClick={() => setIsMpHelpModalOpen(true)} style={{ color: 'var(--accent-cyan)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none', fontWeight: 'bold' }}>
                     <i className="fa-solid fa-circle-question"></i> Como gerar minha chave?
-                  </a>
+                  </span>
                 </p>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>
                   <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
@@ -2640,6 +2717,31 @@ function Painel() {
             <button type="button" className="btn-secondary" onClick={handleLogout} style={{ fontWeight: 'bold', color: 'var(--text-secondary)', borderColor: 'transparent', backgroundColor: 'transparent' }} title="Sair da conta">
               <i className="fa-solid fa-arrow-right-from-bracket"></i> Sair da Conta
             </button>
+          </div>
+        </div>
+      )}
+
+      {isMpHelpModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsMpHelpModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
+            <div className="modal-header">
+              <h2 className="title-md">Como Gerar sua Chave do Mercado Pago</h2>
+              <button className="modal-close" onClick={() => setIsMpHelpModalOpen(false)}>&times;</button>
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px', color: 'var(--text-secondary)' }}>
+              <ol style={{ paddingLeft: '20px', lineHeight: '1.6', margin: 0 }}>
+                <li>Acesse suas credenciais de produção através de <strong>Suas integrações</strong>.</li>
+                <li>Selecione o par de credenciais que você deseja renovar, podendo ser <strong>Public Key e Access Token</strong> ou <strong>Client ID e Client Secret</strong>. Tenha em mente que ambas as credenciais do par que você escolher serão renovadas.</li>
+                <li>Clique nos <strong>três pontos</strong> localizados à direita da credencial que você deseja renovar e selecione <strong>Renovar</strong>. Clique em <strong>Renovar agora</strong> para confirmar a alteração.</li>
+              </ol>
+              <img src={renewCredentialsImg} alt="Passo a passo Mercado Pago" style={{ width: '100%', borderRadius: '8px', border: '1px solid var(--border-color)', marginTop: '8px' }} />
+            </div>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button type="button" className="btn-secondary" onClick={() => setIsMpHelpModalOpen(false)}>Fechar</button>
+              <a href="https://www.mercadopago.com.br/developers/panel/credentials" target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                Acessar Mercado Pago <i className="fa-solid fa-external-link-alt"></i>
+              </a>
+            </div>
           </div>
         </div>
       )}
