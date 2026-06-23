@@ -628,6 +628,14 @@
 .premium-card {
     border-color: rgba(0, 180, 216, 0.3);
     box-shadow: 0 0 40px rgba(0, 180, 216, 0.1);
+    position: relative;
+    z-index: 2;
+}
+
+@media (min-width: 900px) {
+    .premium-card {
+        transform: scale(1.05);
+    }
 }
 
 .popular-badge {
