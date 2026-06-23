@@ -333,31 +333,31 @@ export default function LandingPage() {
                         
                         <div className="bento-card pricing-card premium-card spotlight-card">
                             <div className="popular-badge">Mais Escolhido</div>
-                            <div className="plan-name text-cyan">Plano Profissional</div>
-                            <div className="plan-price">R$ <span className="number">197</span><span className="period">/mês</span></div>
-                            <p className="plan-desc">Controle completo com a sua própria marca.</p>
-                            <ul className="plan-features">
-                                <li>Tudo do Plano Start</li>
-                                <li className="highlight-feature">Sua Página Whitelabel (Personalizada com sua marca)</li>
-                                <li>Controle de "Carro Pronto"</li>
-                                <li>Relatórios de Faturamento</li>
-                                <li>Agendamentos Ilimitados</li>
-                            </ul>
-                            <Link to="/login" className="lp-btn lp-btn-primary lp-btn-block">Assinar Profissional</Link>
-                        </div>
-
-                        <div className="bento-card pricing-card">
-                            <div className="plan-name">Plano Personalizado</div>
+                            <div className="plan-name text-cyan">Plano Personalizado</div>
                             <div className="plan-price" style={{ fontSize: '1.5rem', marginTop: '10px', marginBottom: '10px' }}>Sob Consulta</div>
                             <p className="plan-desc">O seu WhatsApp no Piloto Automático.</p>
                             <ul className="plan-features">
                                 <li>Tudo do Plano Profissional</li>
-                                <li className="highlight-feature">Assistente Virtual (WhatsApp)</li>
-                                <li>Implantação feita por nossa equipe (via n8n)</li>
-                                <li>Fluxos de conversas customizados</li>
+                                <li className="highlight-feature">Assistente IA de Agendamento (WhatsApp)</li>
+                                <li>Implantação e Fluxos Customizados</li>
                                 <li>Treinamento da IA com seus dados</li>
+                                <li>Sem limites de agendamento</li>
                             </ul>
                             <a href="https://wa.me/5511913151641?text=Ol%C3%A1%21%20Gostaria%20de%20saber%20mais%20sobre%20o%20Plano%20Personalizado%20do%20LavaZap%21" target="_blank" rel="noreferrer" className="lp-btn lp-btn-secondary lp-btn-block">Falar com Consultor</a>
+                        </div>
+                        
+                        <div className="bento-card pricing-card">
+                            <div className="plan-name">Plano Profissional</div>
+                            <div className="plan-price">R$ <span className="number">197</span><span className="period">/mês</span></div>
+                            <p className="plan-desc">Controle completo com a sua própria marca.</p>
+                            <ul className="plan-features">
+                                <li>Tudo do Plano Start</li>
+                                <li className="highlight-feature">Sua Página Whitelabel (Cores e Logo)</li>
+                                <li>Sincronização com Google Agenda</li>
+                                <li>Relatórios de Faturamento</li>
+                                <li>Até 500 agendamentos/mês</li>
+                            </ul>
+                            <Link to="/login" className="lp-btn lp-btn-primary lp-btn-block">Assinar Profissional</Link>
                         </div>
                     </div>
                 </div>
