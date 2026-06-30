@@ -189,17 +189,22 @@ function BookingPage() {
     }
   };
 
-  if (loading) return <div className="booking-loading">Carregando agenda...</div>;
+  if (loading) return (
+    <div className="booking-loading-screen">
+      <i className="fa-solid fa-spinner fa-spin"></i>
+      <p>Carregando agenda...</p>
+    </div>
+  );
   if (!loja) return <div className="booking-error"><h2>Lava-Rápido não encontrado!</h2><Link to="/">Voltar</Link></div>;
 
   return (
     <div className="booking-container">
       <div className="booking-card">
         <div className="booking-header">
-          {loja.whitelabel_logo && loja.nome_plano !== 'start' ? (
-            <img src={loja.whitelabel_logo} alt={loja.nome_empresa} style={{ maxHeight: '60px', borderRadius: '8px' }} />
+          {loja.whitelabel_logo ? (
+            <img src={loja.whitelabel_logo} alt={loja.nome_empresa} className="booking-logo" />
           ) : (
-            <h2>{loja.nome_empresa || 'LavaZap Agendamento'}</h2>
+            <h2 className="title-lg" style={{ marginBottom: '10px' }}>{loja.nome_empresa || 'LavaZap Agendamento'}</h2>
           )}
           <h1>Agendamento Online</h1>
           <p>Preencha os dados para confirmar seu horário.</p>

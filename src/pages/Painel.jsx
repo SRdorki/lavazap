@@ -1289,10 +1289,7 @@ function Painel() {
               <option value="todos">Todo o Histórico</option>
             </select>
 
-            {/* Alternador de Tema */}
-            <button className="btn-theme" onClick={toggleTheme} title="Alternar tema">
-              {theme === 'dark' ? <i className="fa-solid fa-sun"></i> : <i className="fa-solid fa-moon"></i>}
-            </button>
+
 
             {/* CTA de Novo Agendamento */}
             <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
@@ -1535,16 +1532,16 @@ function Painel() {
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorFat" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00D2FF" stopOpacity={0.9}/>
-                      <stop offset="100%" stopColor="#3A7BD5" stopOpacity={0.9}/>
+                      <stop offset="0%" stopColor="#ef233c" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#8a0319" stopOpacity={0.9}/>
                     </linearGradient>
                     <linearGradient id="colorLucro" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF8C00" stopOpacity={0.9}/>
-                      <stop offset="100%" stopColor="#FFA500" stopOpacity={0.9}/>
+                      <stop offset="0%" stopColor="#ffffff" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#94a3b8" stopOpacity={0.9}/>
                     </linearGradient>
                     <linearGradient id="colorDesp" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#D500F9" stopOpacity={0.9}/>
-                      <stop offset="100%" stopColor="#FF1493" stopOpacity={0.9}/>
+                      <stop offset="0%" stopColor="#333333" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#111111" stopOpacity={0.9}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.3} />
@@ -2194,24 +2191,11 @@ function Painel() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Ajustes do sistema e perfil da loja.</p>
               </div>
               <div className="header-actions">
-                <button className="btn-theme" onClick={toggleTheme} title="Alternar tema">
-                  {theme === 'dark' ? <i className="fa-solid fa-sun"></i> : <i className="fa-solid fa-moon"></i>}
-                </button>
+
               </div>
             </header>
 
-            {/* Tema */}
-            <div style={{ padding: '24px', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <i className="fa-solid fa-palette" style={{ color: 'var(--accent-cyan)' }}></i> Aparência
-              </h3>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Tema atual: <strong style={{ color: 'var(--text-primary)' }}>{theme === 'dark' ? 'Escuro' : 'Claro'}</strong></span>
-                <button className="btn-secondary" onClick={toggleTheme} style={{ gap: '8px' }}>
-                  {theme === 'dark' ? <><i className="fa-solid fa-sun"></i> Mudar para Claro</> : <><i className="fa-solid fa-moon"></i> Mudar para Escuro</>}
-                </button>
-              </div>
-            </div>
+
 
             {/* Mercado Pago */}
             <div style={{ padding: '24px', backgroundColor: 'var(--bg-secondary)', borderRadius: '12px', marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -2321,33 +2305,44 @@ function Painel() {
                   </div>
                   <div className="form-group" style={{ flex: 2, minWidth: '250px' }}>
                     <label className="form-label">Logomarca (Imagem)</label>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        placeholder="https://..." 
-                        value={formWhitelabelLogo} 
-                        onChange={e => setFormWhitelabelLogo(e.target.value)} 
-                        disabled={assinanteAuth?.nome_plano === 'start'}
-                        style={{ flex: 1, marginBottom: 0 }}
-                      />
-                      <label className={`btn-secondary ${assinanteAuth?.nome_plano === 'start' ? 'disabled' : ''}`} style={{ cursor: 'pointer', margin: 0, padding: '10px 15px', whiteSpace: 'nowrap' }}>
-                        {uploadingLogo ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-upload"></i>} Subir Arquivo
+                    
+                    {formWhitelabelLogo ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'var(--bg-input)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                        <img src={formWhitelabelLogo} alt="Logo Preview" style={{ maxHeight: '40px', borderRadius: '4px', objectFit: 'contain' }} />
+                        <div style={{ flex: 1, fontSize: '14px', color: 'var(--text-secondary)' }}>Logo ativa no momento</div>
+                        <button 
+                          type="button" 
+                          className="btn-secondary" 
+                          style={{ padding: '6px 12px', fontSize: '12px', color: 'var(--status-cancelled)', borderColor: 'var(--status-cancelled)', background: 'transparent' }}
+                          onClick={() => setFormWhitelabelLogo('')}
+                        >
+                          <i className="fa-solid fa-trash"></i> Remover
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                         <input 
-                          type="file" 
-                          accept="image/png, image/jpeg, image/webp" 
-                          style={{ display: 'none' }} 
-                          onChange={handleLogoUpload}
-                          disabled={assinanteAuth?.nome_plano === 'start' || uploadingLogo}
+                          type="text" 
+                          className="form-input" 
+                          placeholder="https://... ou faça upload" 
+                          value={formWhitelabelLogo} 
+                          onChange={e => setFormWhitelabelLogo(e.target.value)} 
+                          disabled={assinanteAuth?.nome_plano === 'start'}
+                          style={{ flex: 1, marginBottom: 0 }}
                         />
-                      </label>
-                    </div>
-                    {assinanteAuth?.nome_plano === 'start' && <span style={{ fontSize: '11px', color: 'var(--status-cancelled)' }}>Exclusivo Profissional/Personalizado</span>}
-                    {formWhitelabelLogo && (
-                      <div style={{ marginTop: '10px' }}>
-                        <img src={formWhitelabelLogo} alt="Logo Preview" style={{ maxHeight: '60px', borderRadius: '4px' }} />
+                        <label className={`btn-secondary ${assinanteAuth?.nome_plano === 'start' ? 'disabled' : ''}`} style={{ cursor: 'pointer', margin: 0, padding: '10px 15px', whiteSpace: 'nowrap' }}>
+                          {uploadingLogo ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-upload"></i>} Subir Arquivo
+                          <input 
+                            type="file" 
+                            accept="image/png, image/jpeg, image/webp" 
+                            style={{ display: 'none' }} 
+                            onChange={handleLogoUpload}
+                            disabled={assinanteAuth?.nome_plano === 'start' || uploadingLogo}
+                          />
+                        </label>
                       </div>
                     )}
+                    {assinanteAuth?.nome_plano === 'start' && <span style={{ fontSize: '11px', color: 'var(--status-cancelled)' }}>Exclusivo Profissional/Personalizado</span>}
                   </div>
                 </div>
 

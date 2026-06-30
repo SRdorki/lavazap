@@ -1,32 +1,33 @@
 :root {
   /* Fonts */
-  --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Manrope', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Colors (Default Dark Mode) */
-  --bg-base: #0A0E17;
-  --bg-panel: #121824;
-  --bg-elevated: #1B2436;
-  --bg-input: #1B2436;
+  /* Colors (Red Noir SaaS) */
+  --bg-base: #000000;
+  --bg-panel: #0a0303;
+  --bg-elevated: #1a0505;
+  --bg-input: #120202;
   
-  --accent-cyan: #00B4D8;
-  --accent-blue: #3B82F6;
+  --accent-cyan: #ef233c;  /* Red Noir primary */
+  --accent-blue: #d90429;  /* Darker Red */
   
   --status-waiting: #FBBF24;     /* Amber */
-  --status-progress: #60A5FA;    /* Blue */
+  --status-progress: #ef233c;    /* Red Noir */
   --status-ready: #34D399;       /* Emerald */
   --status-cancelled: #FB7185;   /* Rose */
   
-  --border-color: #222C3F;
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.35);
   
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 20px rgba(0, 180, 216, 0.25);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 24px rgba(239, 35, 60, 0.25);
   
   /* Animations */
   --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -35,29 +36,6 @@
   /* Layout sizes */
   --sidebar-width: 260px;
   --header-height: 64px;
-}
-
-[data-theme="light"] {
-  /* Colors (Light Mode) */
-  --bg-base: #F8F9FA;
-  --bg-panel: #FFFFFF;
-  --bg-elevated: #F1F5F9;
-  --bg-input: #FFFFFF;
-  
-  --accent-cyan: #0096B1;
-  --accent-blue: #2563EB;
-  
-  --status-waiting: #D97706;     /* Darker Amber */
-  --status-progress: #2563EB;    /* Darker Blue */
-  --status-ready: #059669;       /* Darker Emerald */
-  --status-cancelled: #DC2626;   /* Darker Rose */
-  
-  --border-color: #E2E8F0;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #94A3B8;
-  
-  --shadow-glow: 0 0 20px rgba(0, 150, 177, 0.15);
 }
 
 /* Reset Base */
@@ -97,12 +75,14 @@ body {
 }
 
 .title-lg {
+  font-family: var(--font-heading);
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 .title-md {
+  font-family: var(--font-heading);
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.01em;
