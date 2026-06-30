@@ -364,6 +364,46 @@
 
 .login-otp-notice strong { color: rgba(255,255,255,0.85); font-weight: 600; }
 
+/* ─── OTP Squares ───────────────────────────────── */
+.login-otp-container {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.login-otp-square {
+    width: 38px;
+    height: 46px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--lb);
+    border-radius: 10px;
+    color: var(--lw);
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+    font-family: var(--lhead);
+    transition: all 0.25s ease;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.login-otp-square:focus {
+    outline: none;
+    border-color: var(--lr);
+    background: rgba(239, 35, 60, 0.04);
+    box-shadow: 0 0 0 3px rgba(239, 35, 60, 0.12);
+    transform: translateY(-2px);
+}
+
+/* Esconder as setinhas numéricas (spinners) nos inputs number/numeric */
+.login-otp-square::-webkit-outer-spin-button,
+.login-otp-square::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* ─── Submit button ─────────────────────────────── */
 .login-submit {
     --gradient-angle: 0deg;

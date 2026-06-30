@@ -2552,7 +2552,7 @@ function Painel() {
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.98)',
+          backgroundColor: 'rgba(0, 0, 0, 0.95)',
           zIndex: 99999, /* Acima do onboarding se ambos estiverem true */
           display: 'flex',
           alignItems: 'center',
@@ -2560,9 +2560,9 @@ function Painel() {
           backdropFilter: 'blur(10px)',
           padding: '20px'
         }}>
-          <div className="glass-card" style={{ width: '100%', maxWidth: '1100px', padding: '48px', borderRadius: '24px', textAlign: 'center', animation: 'fadeInUp 0.5s ease-out', maxHeight: '95vh', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '1100px', padding: '48px', borderRadius: '24px', textAlign: 'center', animation: 'fadeInUp 0.5s ease-out', maxHeight: '95vh', overflowY: 'auto', background: 'rgba(8, 8, 8, 0.85)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(239,35,60,0.1)' }}>
             
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', backgroundColor: 'rgba(0, 180, 216, 0.1)', border: '1px solid rgba(0, 180, 216, 0.2)', borderRadius: '20px', color: 'var(--accent-cyan)', fontSize: '12px', fontWeight: '700', marginBottom: '24px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', backgroundColor: 'rgba(239, 35, 60, 0.12)', border: '1px solid rgba(239, 35, 60, 0.2)', borderRadius: '20px', color: '#ef233c', fontSize: '12px', fontWeight: '700', marginBottom: '24px' }}>
               <i className="fa-solid fa-lock"></i>
               Acesso Restrito
             </div>
@@ -2580,11 +2580,11 @@ function Painel() {
             {assinanteAuth?.status_plano !== 'cancelado' && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px', textAlign: 'left' }}>
                 {/* Start Plan */}
-                <div style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.15), transparent)', pointerEvents: 'none' }}></div>
+                <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.03), transparent)', pointerEvents: 'none' }}></div>
                   
                   <div style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', flex: 1, zIndex: 1 }}>
-                    <div style={{ marginBottom: '24px', color: '#3B82F6' }}>
+                    <div style={{ marginBottom: '24px', color: '#ffffff' }}>
                       <i className="fa-solid fa-paper-plane" style={{ fontSize: '28px' }}></i>
                     </div>
                     
@@ -2598,23 +2598,23 @@ function Painel() {
                       <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>/mês</span>
                     </div>
 
-                    <a href={`${STRIPE_LINK_START}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-secondary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', borderColor: 'rgba(255,255,255,0.1)' }}>
+                    <a href={`${STRIPE_LINK_START}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-secondary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', borderColor: 'rgba(255,255,255,0.2)', color: '#fff' }}>
                       Assinar Start (7 Dias Grátis)
                     </a>
 
                     <div style={{ marginTop: 'auto' }}>
-                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#3B82F6', marginBottom: '16px' }}>O Que Está Incluso:</p>
+                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#ffffff', marginBottom: '16px' }}>O Que Está Incluso:</p>
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: '#3B82F6', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ffffff', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Página Pública Padrão</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: '#3B82F6', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ffffff', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Painel de Gestão / Agenda</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: '#3B82F6', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ffffff', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Até 150 agendamentos/mês</span>
                         </li>
                       </ul>
@@ -2623,13 +2623,13 @@ function Painel() {
                 </div>
                 
                 {/* Personalizado Plan */}
-                <div style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid #A855F7', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', transform: 'scale(1.02)', boxShadow: '0 10px 40px rgba(168, 85, 247, 0.15)' }}>
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(168, 85, 247, 0.2), transparent)', pointerEvents: 'none' }}></div>
+                <div style={{ backgroundColor: 'rgba(239, 35, 60, 0.03)', border: '1px solid rgba(239, 35, 60, 0.3)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', transform: 'scale(1.02)', boxShadow: '0 10px 40px rgba(239, 35, 60, 0.15)' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(239, 35, 60, 0.15), transparent)', pointerEvents: 'none' }}></div>
                   
-                  <div style={{ position: 'absolute', top: '24px', right: '24px', backgroundColor: '#A855F7', color: '#fff', fontSize: '11px', fontWeight: 'bold', padding: '4px 12px', borderRadius: '20px' }}>Mais Escolhido</div>
+                  <div style={{ position: 'absolute', top: '24px', right: '24px', backgroundColor: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 'bold', padding: '4px 12px', borderRadius: '20px' }}>Mais Escolhido</div>
 
                   <div style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', flex: 1, zIndex: 1 }}>
-                    <div style={{ marginBottom: '24px', color: '#A855F7' }}>
+                    <div style={{ marginBottom: '24px', color: '#ef233c' }}>
                       <i className="fa-solid fa-building" style={{ fontSize: '28px' }}></i>
                     </div>
                     
@@ -2642,23 +2642,23 @@ function Painel() {
                       <span style={{ fontSize: '32px', fontWeight: '800', color: 'var(--text-primary)' }}>Sob Consulta</span>
                     </div>
 
-                    <a href={`https://wa.me/5511913151641?text=${encodeURIComponent('Olá! Gostaria de saber mais sobre o Plano Personalizado do LavaZap! Meu email: ' + (assinanteAuth?.email || ''))}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', backgroundColor: '#A855F7', borderColor: '#A855F7' }}>
+                    <a href={`https://wa.me/5511913151641?text=${encodeURIComponent('Olá! Gostaria de saber mais sobre o Plano Personalizado do LavaZap! Meu email: ' + (assinanteAuth?.email || ''))}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', backgroundColor: '#ef233c', borderColor: '#ef233c', color: '#fff' }}>
                       Falar com Especialista <i className="fa-brands fa-whatsapp" style={{ marginLeft: '8px' }}></i>
                     </a>
 
                     <div style={{ marginTop: 'auto' }}>
-                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#A855F7', marginBottom: '16px' }}>Tudo do Profissional, Mais:</p>
+                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#ef233c', marginBottom: '16px' }}>Tudo do Profissional, Mais:</p>
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: '#A855F7', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ef233c', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Assistente IA de Agendamento</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: '#A855F7', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ef233c', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Agendamentos Ilimitados</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: '#A855F7', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ef233c', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Suporte Prioritário</span>
                         </li>
                       </ul>
@@ -2667,11 +2667,11 @@ function Painel() {
                 </div>
 
                 {/* Profissional Plan */}
-                <div style={{ backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(0, 180, 216, 0.15), transparent)', pointerEvents: 'none' }}></div>
+                <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '16px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', boxShadow: '0 10px 40px rgba(255, 255, 255, 0.05)' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.08), transparent)', pointerEvents: 'none' }}></div>
                   
                   <div style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', flex: 1, zIndex: 1 }}>
-                    <div style={{ marginBottom: '24px', color: 'var(--accent-cyan)' }}>
+                    <div style={{ marginBottom: '24px', color: '#ffffff' }}>
                       <i className="fa-solid fa-rocket" style={{ fontSize: '28px' }}></i>
                     </div>
                     
@@ -2685,23 +2685,23 @@ function Painel() {
                       <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>/mês</span>
                     </div>
 
-                    <a href={`${STRIPE_LINK_PREMIUM}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-secondary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', borderColor: 'rgba(255,255,255,0.1)' }}>
+                    <a href={`${STRIPE_LINK_PREMIUM}?prefilled_email=${encodeURIComponent(assinanteAuth?.email || '')}&client_reference_id=${assinanteAuth?.id}`} className="btn-primary" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: '12px', textDecoration: 'none', width: '100%', height: 'auto', minHeight: '44px', fontSize: '14px', fontWeight: 'bold', lineHeight: '1.4', marginBottom: '32px', borderRadius: '8px', backgroundColor: '#ffffff', borderColor: '#ffffff', color: '#000' }}>
                       Assinar Profissional
                     </a>
 
                     <div style={{ marginTop: 'auto' }}>
-                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--accent-cyan)', marginBottom: '16px' }}>Tudo do Start, Mais:</p>
+                      <p style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#ffffff', marginBottom: '16px' }}>Tudo do Start, Mais:</p>
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: 'var(--accent-cyan)', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ffffff', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Whitelabel (Cores e Logo)</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: 'var(--accent-cyan)', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ffffff', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Google Calendar Sync</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                          <i className="fa-solid fa-check" style={{ color: 'var(--accent-cyan)', marginTop: '3px', fontSize: '14px' }}></i>
+                          <i className="fa-solid fa-check" style={{ color: '#ffffff', marginTop: '3px', fontSize: '14px' }}></i>
                           <span>Até 500 agendamentos/mês</span>
                         </li>
                       </ul>
