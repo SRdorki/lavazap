@@ -7,6 +7,8 @@ import BookingPage from './pages/BookingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import SuperAdmin from './pages/SuperAdmin';
 import SuperAdminRoute from './components/SuperAdminRoute';
+import CookiesPage from './pages/CookiesPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
             </SuperAdminRoute>
           } 
         />
+        <Route path="/cookies" element={<CookiesPage />} />
+        <Route path="/privacidade" element={<PrivacyPage />} />
         {/* Redirect any unknown routes to Landing Page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
