@@ -373,14 +373,16 @@ function Painel() {
     metric1Label = 'Faturamento Hoje';
     metric2Label = 'Faturamento Ontem';
     metric1Footer = 'vs. ontem';
-    metric2Footer = 'Dia 14/06 completo';
+    const ontem = new Date(hoje);
+    ontem.setDate(ontem.getDate() - 1);
+    
+    const ontemStr = `${String(ontem.getDate()).padStart(2, '0')}/${String(ontem.getMonth() + 1).padStart(2, '0')}`;
+    metric2Footer = `Dia ${ontemStr} completo`;
     
     metric1Value = agendamentos
       .filter(a => new Date(a.data_hora).toDateString() === hoje.toDateString() && a.pago)
       .reduce((acc, curr) => acc + Number(curr.valor_total), 0);
       
-    const ontem = new Date(hoje);
-    ontem.setDate(ontem.getDate() - 1);
     metric2Value = agendamentos
       .filter(a => new Date(a.data_hora).toDateString() === ontem.toDateString() && a.pago)
       .reduce((acc, curr) => acc + Number(curr.valor_total), 0);
