@@ -581,7 +581,7 @@ export default function LandingPage() {
                                     WhatsApp
                                 </a>
                             </li>
-                            <li><a href="https://www.instagram.com/lava.zap/" target='blank_' rel="noreferrer">Instagram</a></li>
+                            <li><a href="https://www.instagram.com/lava.zap/" target='_blank' rel="noreferrer">Instagram</a></li>
                         </ul>
                     </div>
                 </div>
