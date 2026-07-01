@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import { createPaymentLink } from '../mercadoPago'
 import renewCredentialsImg from '../assets/renew-credentials-pt.jpg'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import TutorialTour from '../components/TutorialTour'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 const STRIPE_LINK_START = import.meta.env.VITE_STRIPE_LINK_START || '#'
@@ -1141,6 +1142,7 @@ function Painel() {
 
   return (
     <div className="app-container">
+      <TutorialTour />
       {/* Sidebar Navigation */}
       <div className={`sidebar-overlay ${isMobileMenuOpen ? 'visible' : ''}`} onClick={() => setIsMobileMenuOpen(false)}></div>
       <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
@@ -1154,7 +1156,7 @@ function Painel() {
             </>
           )}
         </div>
-        <nav className="sidebar-menu">
+        <nav className="sidebar-menu tour-step-menu">
           <div className="menu-category">Menu</div>
           <div 
             className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
@@ -1209,7 +1211,7 @@ function Painel() {
           </div>
 
           <div 
-            className={`menu-item ${activeTab === 'configuracoes' ? 'active' : ''}`}
+            className={`menu-item tour-step-configuracoes ${activeTab === 'configuracoes' ? 'active' : ''}`}
             onClick={() => { setActiveTab('configuracoes'); setIsMobileMenuOpen(false); }}
           >
             <span className="menu-icon"><i className="fa-solid fa-gear"></i></span>
@@ -1294,7 +1296,7 @@ function Painel() {
 
 
             {/* CTA de Novo Agendamento */}
-            <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+            <button className="btn-primary tour-step-novo-agendamento" onClick={() => setIsModalOpen(true)}>
               <span>+ Novo Agendamento</span>
             </button>
           </div>
@@ -1370,7 +1372,7 @@ function Painel() {
 
         {/* Kanban Board Section */}
         <section className="kanban-section">
-          <div className="kanban-board">
+          <div className="kanban-board tour-step-kanban">
             {/* Coluna: Aguardando */}
             <div className="kanban-column">
               <div className="column-header">
@@ -1580,7 +1582,7 @@ function Painel() {
                     <i className="fa-solid fa-arrows-rotate"></i> Sincronizar
                   </button>
                 )}
-                <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+                <button className="btn-primary tour-step-novo-agendamento" onClick={() => setIsModalOpen(true)}>
                   <span>+ Novo Agendamento</span>
                 </button>
               </div>
