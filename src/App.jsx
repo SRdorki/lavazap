@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Painel from './pages/Painel';
@@ -11,6 +13,16 @@ import CookiesPage from './pages/CookiesPage';
 import PrivacyPage from './pages/PrivacyPage';
 
 function App() {
+  useEffect(() => {
+    const lenis = new Lenis({
+      autoRaf: true,
+    });
+    
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
