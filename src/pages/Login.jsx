@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
+import { getClientIp, checkIfBlocked, recordFailedAttempt, recordSuccessfulLogin, getBlockMessage } from '../lib/bruteForceProtection';
 import './Login.css';
 import logoImg from '../assets/lavazap_final_logo_nobg.png';
 
@@ -26,6 +27,41 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Brute-force protection state
+  const [clientIp, setClientIp] = useState(null);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockMinutes, setBlockMinutes] = useState(0);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const blockTimerRef = useRef(null);
+
+  // Validação de senha forte
+  const validatePassword = (pw) => {
+    if (pw.length < 8) return 'A senha deve ter pelo menos 8 caracteres.';
+    if (!/[A-Z]/.test(pw)) return 'A senha deve conter pelo menos uma letra maiúscula.';
+    if (!/[0-9]/.test(pw)) return 'A senha deve conter pelo menos um número.';
+    return null;
+  };
+
+  // Busca o IP do cliente e verifica bloqueio ao montar
+  useEffect(() => {
+    async function initBruteForceCheck() {
+      const ip = await getClientIp();
+      setClientIp(ip);
+      const status = await checkIfBlocked(ip);
+      if (status.blocked) {
+        setIsBlocked(true);
+        setBlockMinutes(status.remainingMinutes);
+        startBlockCountdown(status.remainingMinutes);
+      }
+      setFailedAttempts(status.attempts);
+    }
+    initBruteForceCheck();
+
+    return () => {
+      if (blockTimerRef.current) clearInterval(blockTimerRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const hashError = hashParams.get('error_description');
@@ -39,17 +75,78 @@ export default function Login() {
     return () => { authListener.subscription.unsubscribe(); };
   }, [navigate]);
 
+  // Countdown timer para desbloquear automaticamente
+  const startBlockCountdown = (minutes) => {
+    if (blockTimerRef.current) clearInterval(blockTimerRef.current);
+    let remaining = minutes;
+    setBlockMinutes(remaining);
+    blockTimerRef.current = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(blockTimerRef.current);
+        blockTimerRef.current = null;
+        setIsBlocked(false);
+        setBlockMinutes(0);
+        setFailedAttempts(0);
+        setError(null);
+      } else {
+        setBlockMinutes(remaining);
+      }
+    }, 60000); // Atualiza a cada 1 minuto
+  };
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true); setError(null); setSuccess(null);
+
+    // Verificação de brute-force antes de tentar login ou cadastro
+    if (clientIp) {
+      const status = await checkIfBlocked(clientIp);
+      if (status.blocked) {
+        setIsBlocked(true);
+        setBlockMinutes(status.remainingMinutes);
+        setError(getBlockMessage(status.remainingMinutes));
+        startBlockCountdown(status.remainingMinutes);
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       const cleanEmail = email.trim().toLowerCase();
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
-        if (error) throw error;
+        if (error) {
+          // Registra tentativa falhada
+          if (clientIp) {
+            await recordFailedAttempt(clientIp, cleanEmail);
+            const newAttempts = failedAttempts + 1;
+            setFailedAttempts(newAttempts);
+
+            // Verifica se atingiu o limite
+            if (newAttempts >= 5) {
+              setIsBlocked(true);
+              setBlockMinutes(30);
+              startBlockCountdown(30);
+              throw new Error(getBlockMessage(30));
+            } else {
+              const remaining = 5 - newAttempts;
+              throw new Error(`${error.message} (${remaining} tentativa${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''})`);
+            }
+          }
+          throw error;
+        }
+
+        // Login bem-sucedido: limpa tentativas
+        if (clientIp) {
+          await recordSuccessfulLogin(clientIp, cleanEmail);
+          setFailedAttempts(0);
+        }
         navigate('/painel');
       } else {
+        const pwError = validatePassword(password);
+        if (pwError) { setError(pwError); setLoading(false); return; }
+
         const { error: signUpError } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
@@ -94,7 +191,8 @@ export default function Login() {
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
-    if (password.length < 6) { setError('A senha deve ter 6+ caracteres.'); return; }
+    const pwError = validatePassword(password);
+    if (pwError) { setError(pwError); return; }
     setLoading(true); setError(null); setSuccess(null);
     try {
       const { error } = await supabase.auth.updateUser({ password });
@@ -251,6 +349,21 @@ export default function Login() {
           </div>
         )}
 
+        {isBlocked && (
+          <div className="login-alert login-alert-error" style={{ background: 'rgba(255, 40, 40, 0.15)', border: '1px solid rgba(255, 40, 40, 0.3)', padding: '16px', textAlign: 'center' }}>
+            <i className="fa-solid fa-shield-halved" style={{ fontSize: '24px', display: 'block', marginBottom: '8px' }}></i>
+            <strong style={{ display: 'block', marginBottom: '4px' }}>IP Bloqueado</strong>
+            <span>Muitas tentativas de login falharam.<br/>Tente novamente em <strong>{blockMinutes}</strong> minuto{blockMinutes !== 1 ? 's' : ''}.</span>
+          </div>
+        )}
+
+        {!isBlocked && failedAttempts > 0 && failedAttempts < 5 && (
+          <div className="login-alert login-alert-error" style={{ background: 'rgba(255, 165, 0, 0.1)', border: '1px solid rgba(255, 165, 0, 0.3)' }}>
+            <i className="fa-solid fa-triangle-exclamation" style={{ color: '#ffa500' }}></i>
+            <span style={{ color: '#ffa500' }}>Atenção: {5 - failedAttempts} tentativa{5 - failedAttempts !== 1 ? 's' : ''} restante{5 - failedAttempts !== 1 ? 's' : ''} antes do bloqueio.</span>
+          </div>
+        )}
+
         <form onSubmit={isVerifyingOtp ? handleVerifyOtp : isRecovering ? handleUpdatePassword : isResettingPassword ? handleResetPassword : handleAuth} className="login-form" noValidate>
           {isVerifyingOtp ? (
             <div className="login-field">
@@ -355,7 +468,7 @@ export default function Login() {
             </>
           )}
 
-          <button type="submit" className="login-submit" disabled={loading}>
+          <button type="submit" className="login-submit" disabled={loading || isBlocked}>
             {loading ? <><span className="login-spinner"></span> Aguarde...</> : 
              isVerifyingOtp ? 'Verificar Código' :
              isRecovering ? 'Salvar Nova Senha' : 

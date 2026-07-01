@@ -14,7 +14,7 @@ export const createPaymentLink = async (amount, description, agendamentoId, user
       },
       body: JSON.stringify({
         external_reference: agendamentoId,
-        notification_url: 'https://mckqzctougnecfucbwmg.supabase.co/functions/v1/mercadopago-webhook',
+        notification_url: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mercadopago-webhook`,
         items: [
           {
             title: description,

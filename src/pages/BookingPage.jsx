@@ -11,6 +11,7 @@ function BookingPage() {
   const [loja, setLoja] = useState(null);
   const [servicos, setServicos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   // Form (Populated from URL)
   const [nome, setNome] = useState(searchParams.get('nome') || '');
@@ -47,10 +48,6 @@ function BookingPage() {
           }
 
           const { data: srvs, error: srvsErr } = await supabase.from('servicos').select('*').eq('user_id', storeData.id);
-          console.log("LOG DEBUG BookingPage -> storeData.id:", storeData.id);
-          console.log("LOG DEBUG BookingPage -> srvs:", srvs);
-          console.log("LOG DEBUG BookingPage -> srvsErr:", srvsErr);
-          
           if (srvs) {
             setServicos(srvs);
             if (srvs.length > 0 && !searchParams.get('servicoId')) {
@@ -132,31 +129,56 @@ function BookingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!loja) return;
+    if (submitting) return;
     if (!horarioSelecionado) {
       alert("Por favor, selecione um horário disponível.");
       return;
     }
 
+    // Validação de inputs
+    const nomeClean = nome.trim();
+    const celularClean = celular.replace(/\D/g, '');
+    const veiculoClean = veiculo.trim();
+    const placaClean = placa.trim().toUpperCase();
+
+    if (!nomeClean || nomeClean.length < 2 || nomeClean.length > 100) {
+      alert("Nome inválido. Digite pelo menos 2 caracteres.");
+      return;
+    }
+    if (!/^\d{10,11}$/.test(celularClean)) {
+      alert("Celular inválido. Digite um número com DDD (10 ou 11 dígitos).");
+      return;
+    }
+    if (!veiculoClean || veiculoClean.length < 2) {
+      alert("Veículo inválido. Digite o modelo do veículo.");
+      return;
+    }
+    if (!/^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(placaClean)) {
+      alert("Placa inválida. Use o formato ABC1D23 ou ABC1234.");
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
       const precoServico = servicos.find(s => s.id === servicoId)?.preco || 0;
-      const cleanCelular = celular.replace(/\D/g, '');
 
       // CRM: Cadastra ou Atualiza Cliente
       const { data: exCliente } = await supabase
         .from('clientes')
         .select('id')
         .eq('user_id', loja.id)
-        .eq('celular', cleanCelular)
+        .eq('celular', celularClean)
         .single();
 
       let finalClienteId = null;
       if (!exCliente) {
         const novoCli = {
           user_id: loja.id,
-          nome,
-          celular: cleanCelular,
-          veiculo: veiculo,
-          placa: placa.toUpperCase()
+          nome: nomeClean,
+          celular: celularClean,
+          veiculo: veiculoClean,
+          placa: placaClean
         };
         const { data: insertedCli } = await supabase.from('clientes').insert(novoCli).select().single();
         if (insertedCli) finalClienteId = insertedCli.id;
@@ -174,10 +196,10 @@ function BookingPage() {
         status: 'waiting',
         pago: false,
         valor_total: precoServico,
-        placa: placa.toUpperCase(),
-        cliente_nome: nome,
-        veiculo_modelo: veiculo,
-        celular_cliente: cleanCelular
+        placa: placaClean,
+        cliente_nome: nomeClean,
+        veiculo_modelo: veiculoClean,
+        celular_cliente: celularClean
       };
 
       const { error } = await supabase.from('agendamentos').insert(novoAgendamento);
@@ -186,6 +208,9 @@ function BookingPage() {
       setSucesso(true);
     } catch (err) {
       alert("Erro ao realizar agendamento: " + err.message);
+    } finally {
+      // Rate limiting: 3 second cooldown
+      setTimeout(() => setSubmitting(false), 3000);
     }
   };
 
@@ -263,8 +288,8 @@ function BookingPage() {
               )}
             </div>
 
-            <button type="submit" className="btn-primary booking-submit" disabled={!horarioSelecionado}>
-              Confirmar Horário
+            <button type="submit" className="btn-primary booking-submit" disabled={!horarioSelecionado || submitting}>
+              {submitting ? 'Aguarde...' : 'Confirmar Horário'}
             </button>
           </form>
         )}

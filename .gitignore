@@ -49,3 +49,8 @@ coverage/
 
 # TypeScript
 *.tsbuildinfo
+
+# Debug/utility scripts with hardcoded credentials
+check_*.mjs
+create_*.mjs
+check_db.js

@@ -160,7 +160,7 @@ function Painel() {
       const { data: funcData } = await supabase.from('funcionarios').select('*').eq('user_id', userId)
       if (funcData) setFuncionarios(funcData)
 
-      const { data: myUser } = await supabase.from('assinantes').select('*').eq('id', userId).single()
+      const { data: myUser } = await supabase.from('assinantes').select('id, email, telefone, nome_empresa, status_plano, plano_expira_em, nome_plano, is_admin, mp_access_token, bot_numero_teste, whitelabel_url, whitelabel_color, whitelabel_logo, n8n_webhook_url').eq('id', userId).single()
       if (myUser) {
         setAssinanteAuth(myUser)
         setFormMpToken(myUser.mp_access_token || '')
@@ -603,7 +603,14 @@ function Painel() {
     if (assinanteAuth?.nome_plano === 'vip') {
       try {
         // Dispara para o webhook de produção do n8n do usuário VIP
-        await fetch('http://localhost:5678/webhook/webhook', {
+        const webhookUrl = assinanteAuth?.n8n_webhook_url;
+        if (!webhookUrl) {
+          console.warn('Webhook do n8n não configurado para este assinante.');
+          const url = `https://api.whatsapp.com/send?phone=${payload.client_phone}&text=${encodeURIComponent(text)}`;
+          window.open(url, '_blank');
+          return;
+        }
+        await fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -647,7 +654,7 @@ function Painel() {
       } else if (errCli) {
         if (errCli.code === '23505' || errCli.message?.includes('clientes_celular_user_id_key')) {
           // O cliente já existe no banco (talvez inserido em outra aba/sessão), busca pelo celular
-          const { data: existingDbCli } = await supabase.from('clientes').select('*').eq('celular', sanitizedCel).single();
+          const { data: existingDbCli } = await supabase.from('clientes').select('id, nome, celular, veiculo, placa, user_id').eq('celular', sanitizedCel).single();
           if (existingDbCli) {
             clienteId = existingDbCli.id;
             setClientes(prev => {

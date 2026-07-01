@@ -22,7 +22,7 @@ export default function SuperAdmin() {
 
       const { data, error } = await supabase
         .from('assinantes')
-        .select('*')
+        .select('id, email, telefone, nome_empresa, status_plano, plano_expira_em, nome_plano, is_admin, n8n_webhook_url, created_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
