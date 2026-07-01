@@ -267,22 +267,22 @@ export default function LandingPage() {
                         <div className="timeline-item">
                             <div className="timeline-dot"></div>
                             <div className="timeline-content">
-                                <h3>1. Conecte seu WhatsApp</h3>
-                                <p>Leia o QR Code na tela do sistema e seu número já estará automatizado. Simples assim.</p>
+                                <h3>1. Crie sua conta e configure</h3>
+                                <p>Cadastre seus serviços, preços e conecte seu Mercado Pago para receber pagamentos. Leva menos de 5 minutos.</p>
                             </div>
                         </div>
                         <div className="timeline-item">
                             <div className="timeline-dot"></div>
                             <div className="timeline-content">
-                                <h3>2. Divulgue seu link ou número</h3>
-                                <p>Coloque no Instagram ou passe para os clientes. Quando chamarem, a Inteligência Artificial atende imediatamente.</p>
+                                <h3>2. Compartilhe seu link exclusivo</h3>
+                                <p>Você ganha uma página de agendamento personalizada com sua marca. Divulgue no Instagram, WhatsApp ou onde quiser.</p>
                             </div>
                         </div>
                         <div className="timeline-item">
                             <div className="timeline-dot"></div>
                             <div className="timeline-content">
-                                <h3>3. A mágica acontece</h3>
-                                <p>O robô consulta a agenda, marca o cliente no horário livre e o veículo já aparece no seu painel de gestão na mesma hora.</p>
+                                <h3>3. Clientes agendam sozinhos</h3>
+                                <p>O cliente escolhe o serviço, o horário livre e confirma. O agendamento aparece no seu painel em tempo real, sem você mover um dedo.</p>
                             </div>
                         </div>
                     </div>
