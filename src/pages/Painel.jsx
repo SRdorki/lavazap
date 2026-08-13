@@ -69,6 +69,7 @@ function Painel() {
 
   // MP State
   const [formMpToken, setFormMpToken] = useState('')
+  const [formMpPublicKey, setFormMpPublicKey] = useState('')
   
   // Bot State
   const [formBotNumero, setFormBotNumero] = useState('')
@@ -160,10 +161,12 @@ function Painel() {
       const { data: funcData } = await supabase.from('funcionarios').select('*').eq('user_id', userId)
       if (funcData) setFuncionarios(funcData)
 
-      const { data: myUser } = await supabase.from('assinantes').select('id, email, telefone, nome_empresa, status_plano, plano_expira_em, nome_plano, is_admin, mp_access_token, bot_numero_teste, whitelabel_url, whitelabel_color, whitelabel_logo, n8n_webhook_url').eq('id', userId).single()
+      const { data: myUser } = await supabase.from('assinantes').select('id, email, telefone, nome_empresa, status_plano, plano_expira_em, nome_plano, is_admin, mp_access_token, mp_public_key, bot_numero_teste, whitelabel_url, whitelabel_color, whitelabel_logo, n8n_webhook_url').eq('id', userId).single()
+      
       if (myUser) {
         setAssinanteAuth(myUser)
         setFormMpToken(myUser.mp_access_token || '')
+        setFormMpPublicKey(myUser.mp_public_key || '')
         setFormBotNumero(myUser.bot_numero_teste || '')
           
           let defaultSlug = '';
@@ -569,10 +572,8 @@ function Painel() {
     let paymentLink = '';
 
     if (!a.pago && a.status === 'ready') {
-      paymentLink = await createPaymentLink(a.valor_total, `Lavagem: ${servicoNome}`, a.id, assinanteAuth?.mp_access_token);
-      if (paymentLink) {
-        pixText = `\n\nPara adiantar, acesse o link abaixo para realizar o pagamento (PIX ou Cartão):\n${paymentLink}`;
-      }
+      paymentLink = `${window.location.origin}/checkout/${a.id}`;
+      pixText = `\n\nPara adiantar, acesse o link abaixo para realizar o pagamento (PIX ou Cartão):\n${paymentLink}`;
     }
 
     let text = '';
@@ -913,10 +914,10 @@ function Painel() {
   const handleSaveMpToken = async () => {
     if (!assinanteAuth) return;
     try {
-      const { error } = await supabase.from('assinantes').update({ mp_access_token: formMpToken }).eq('id', assinanteAuth.id);
+      const { error } = await supabase.from('assinantes').update({ mp_access_token: formMpToken, mp_public_key: formMpPublicKey }).eq('id', assinanteAuth.id);
       if (error) throw error;
-      alert('Token salvo com sucesso!');
-      setAssinanteAuth(prev => ({ ...prev, mp_access_token: formMpToken }));
+      alert('Credenciais do Mercado Pago salvas com sucesso!');
+      setAssinanteAuth(prev => ({ ...prev, mp_access_token: formMpToken, mp_public_key: formMpPublicKey }));
     } catch (err) {
       console.error(err);
       alert('Erro ao salvar token. Verifique as permissões de segurança.');
@@ -2224,6 +2225,16 @@ function Painel() {
                 </p>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>
                   <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                    <label className="form-label">Public Key</label>
+                    <input 
+                      type="text" 
+                      className="form-input text-mono" 
+                      placeholder="APP_USR-..." 
+                      value={formMpPublicKey} 
+                      onChange={e => setFormMpPublicKey(e.target.value)} 
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
                     <label className="form-label">Access Token de Produção</label>
                     <input 
                       type="password" 
@@ -2234,7 +2245,7 @@ function Painel() {
                     />
                   </div>
                   <button className="btn-primary" onClick={handleSaveMpToken} style={{ whiteSpace: 'nowrap' }}>
-                    <i className="fa-solid fa-floppy-disk"></i> Salvar Token
+                    <i className="fa-solid fa-floppy-disk"></i> Salvar Credenciais
                   </button>
                 </div>
                 {assinanteAuth?.mp_access_token && (

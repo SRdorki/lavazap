@@ -38,3 +38,32 @@ export const createPaymentLink = async (amount, description, agendamentoId, user
     return null;
   }
 };
+
+export const processPayment = async (formData, agendamentoId, description, userToken) => {
+  if (!userToken) {
+    return { error: 'Token não configurado' };
+  }
+
+  const payload = {
+    formData,
+    agendamentoId,
+    description,
+    userToken
+  };
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mercadopago-pay`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erro ao processar pagamento:", error);
+    return { error: error.message };
+  }
+};

@@ -11,6 +11,7 @@ import SuperAdmin from './pages/SuperAdmin';
 import SuperAdminRoute from './components/SuperAdminRoute';
 import CookiesPage from './pages/CookiesPage';
 import PrivacyPage from './pages/PrivacyPage';
+import CheckoutPage from './pages/CheckoutPage';
 
 function App() {
   useEffect(() => {
@@ -45,6 +46,7 @@ function App() {
             </SuperAdminRoute>
           } 
         />
+        <Route path="/checkout/:id" element={<CheckoutPage />} />
         <Route path="/cookies" element={<CookiesPage />} />
         <Route path="/privacidade" element={<PrivacyPage />} />
         {/* Redirect any unknown routes to Landing Page */}

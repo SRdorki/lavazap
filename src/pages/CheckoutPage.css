@@ -1,0 +1,173 @@
+.checkout-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-color, #f4f7f6);
+  padding: 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+.checkout-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 450px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  animation: fadeUp 0.5s ease-out;
+}
+
+.checkout-header {
+  margin-bottom: 30px;
+}
+
+.checkout-logo {
+  max-width: 120px;
+  max-height: 60px;
+  object-fit: contain;
+  margin-bottom: 15px;
+}
+
+.checkout-header h1 {
+  font-size: 24px;
+  color: #333;
+  margin: 0;
+  font-weight: 700;
+}
+
+.checkout-summary {
+  text-align: left;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid #eee;
+}
+
+.checkout-summary h3 {
+  font-size: 16px;
+  color: #555;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.summary-item span {
+  color: #666;
+}
+
+.summary-item strong {
+  color: #333;
+  text-align: right;
+  max-width: 60%;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px dashed #ddd;
+  font-size: 18px;
+  color: #111;
+}
+
+.checkout-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.btn-pay {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background-color: #009ee3; /* Mercado Pago Color */
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-pay:hover:not(:disabled) {
+  background-color: #008cc9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 158, 227, 0.4);
+}
+
+.btn-pay:disabled {
+  background-color: #a5d8f3;
+  cursor: not-allowed;
+}
+
+.secure-badge {
+  font-size: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.checkout-success {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.success-icon {
+  font-size: 60px;
+  color: #4CAF50;
+  margin-bottom: 20px;
+}
+
+.checkout-success h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.checkout-success p {
+  color: #666;
+  font-size: 15px;
+}
+
+.checkout-loading-screen, .checkout-error {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-color, #f4f7f6);
+  color: #555;
+}
+
+.checkout-loading-screen i {
+  font-size: 40px;
+  color: var(--primary-color, #2563eb);
+  margin-bottom: 20px;
+}
+
+.checkout-error h2 {
+  color: #e53e3e;
+  margin-bottom: 10px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
