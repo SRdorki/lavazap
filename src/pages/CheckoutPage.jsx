@@ -268,16 +268,6 @@ function CheckoutPage() {
                 <div className="payment-brick-wrapper" style={{ opacity: isProcessing ? 0.5 : 1, pointerEvents: isProcessing ? 'none' : 'auto' }}>
                   <Payment
                     initialization={{ amount: Number(agendamento.valor_total) }}
-                    customization={{
-                      paymentMethods: {
-                        bankTransfer: 'all', // Inclui PIX
-                        creditCard: 'all',
-                        debitCard: 'all', // Cartão de Débito
-                        types: {
-                          excluded: ['ticket']
-                        }
-                      },
-                    }}
                     onSubmit={handlePaymentSubmit}
                     onError={onError}
                   />
