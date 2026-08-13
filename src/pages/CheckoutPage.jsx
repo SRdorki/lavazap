@@ -145,9 +145,7 @@ function CheckoutPage() {
 
   const onError = async (error) => {
     console.error("Erro no Brick:", error);
-    if (agendamento && Number(agendamento.valor_total) < 1) {
-      alert("Erro ao carregar o pagamento. O valor (R$ " + agendamento.valor_total + ") pode ser muito baixo para o Mercado Pago (mínimo de R$ 1,00 para certas formas de pagamento).");
-    }
+    alert("Erro ao carregar o pagamento do Mercado Pago: " + (error?.message || JSON.stringify(error)));
   };
 
   if (loading) {
@@ -275,6 +273,9 @@ function CheckoutPage() {
                         bankTransfer: 'all', // Inclui PIX
                         creditCard: 'all',
                         debitCard: 'all', // Cartão de Débito
+                        types: {
+                          excluded: ['ticket']
+                        }
                       },
                     }}
                     onSubmit={handlePaymentSubmit}
