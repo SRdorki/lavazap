@@ -783,6 +783,10 @@ function Painel() {
 
   const handleRemoveServico = async (id) => {
     if (window.confirm('Tem certeza que deseja remover este serviço?')) {
+      if (formServico === id) {
+        const nextServico = servicos.find(s => s.id !== id);
+        setFormServico(nextServico ? nextServico.id : '');
+      }
       setServicos(prev => prev.filter(s => s.id !== id));
       await supabase.from('servicos').delete().eq('id', id);
     }
