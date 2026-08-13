@@ -275,8 +275,6 @@ function CheckoutPage() {
                         bankTransfer: 'all', // Inclui PIX
                         creditCard: 'all',
                         debitCard: 'all', // Cartão de Débito
-                        ticket: 'all', // Boleto
-                        mercadoPago: 'all', // Saldo MP
                       },
                     }}
                     onSubmit={handlePaymentSubmit}
