@@ -268,8 +268,18 @@ function CheckoutPage() {
                 <div className="payment-brick-wrapper" style={{ opacity: isProcessing ? 0.5 : 1, pointerEvents: isProcessing ? 'none' : 'auto' }}>
                   <Payment
                     initialization={{ amount: Number(agendamento.valor_total) }}
+                    customization={{
+                      paymentMethods: {
+                        ticket: "all",
+                        bankTransfer: "all",
+                        creditCard: "all",
+                        debitCard: "all",
+                        mercadoPago: "all",
+                      },
+                    }}
                     onSubmit={handlePaymentSubmit}
                     onError={onError}
+                    onReady={() => console.log('Payment Brick is ready!')}
                   />
                   {isProcessing && <div style={{ textAlign: 'center', marginTop: '10px' }}><i className="fa-solid fa-spinner fa-spin"></i> Processando pagamento...</div>}
                 </div>
