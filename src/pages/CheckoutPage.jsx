@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { processPayment } from '../mercadoPago';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import './CheckoutPage.css';
+
+// Garante que initMercadoPago só é chamado uma vez por chave pública
+let mpInitializedKey = null;
 
 function CheckoutPage() {
   const { id } = useParams();
@@ -16,6 +19,8 @@ function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [pendingPaymentInfo, setPendingPaymentInfo] = useState(null);
+  // Só renderiza o Brick depois que o MP estiver inicializado
+  const [mpReady, setMpReady] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -33,7 +38,7 @@ function CheckoutPage() {
 
         setAgendamento(agData);
 
-        const { data: storeData, error: storeErr } = await supabase
+        const { data: storeData } = await supabase
           .from('assinantes')
           .select('id, nome_empresa, whitelabel_color, whitelabel_logo, nome_plano, mp_access_token, mp_public_key')
           .eq('id', agData.user_id)
@@ -45,7 +50,13 @@ function CheckoutPage() {
             document.documentElement.style.setProperty('--primary-color', storeData.whitelabel_color);
           }
           if (storeData.mp_public_key) {
-            initMercadoPago(storeData.mp_public_key, { locale: 'pt-BR' });
+            // Só inicializa se ainda não foi inicializado com esta chave
+            if (mpInitializedKey !== storeData.mp_public_key) {
+              initMercadoPago(storeData.mp_public_key, { locale: 'pt-BR' });
+              mpInitializedKey = storeData.mp_public_key;
+            }
+            // Pequeno delay para garantir que o SDK registrou tudo antes de montar o Brick
+            setTimeout(() => setMpReady(true), 300);
           }
         }
 
@@ -263,6 +274,11 @@ function CheckoutPage() {
               {!loja?.mp_public_key ? (
                 <div className="checkout-error" style={{ minHeight: 'auto', padding: '20px' }}>
                   <p>O lojista ainda não configurou a Chave Pública do Mercado Pago para pagamentos transparentes.</p>
+                </div>
+              ) : !mpReady ? (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#888' }}>
+                  <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '28px', marginBottom: '12px', display: 'block' }}></i>
+                  <p style={{ margin: 0, fontSize: '14px' }}>Carregando opções de pagamento...</p>
                 </div>
               ) : (
                 <div className="payment-brick-wrapper" style={{ opacity: isProcessing ? 0.5 : 1, pointerEvents: isProcessing ? 'none' : 'auto' }}>
