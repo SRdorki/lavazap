@@ -2,15 +2,34 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { processPayment } from '../mercadoPago';
-import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import './CheckoutPage.css';
 
-// Garante que initMercadoPago só é chamado uma vez por chave pública
-let mpInitializedKey = null;
+// Carrega o script do SDK do MercadoPago dinamicamente (apenas uma vez)
+function loadMercadoPagoScript() {
+  return new Promise((resolve, reject) => {
+    if (window.MercadoPago) {
+      resolve(window.MercadoPago);
+      return;
+    }
+    const existing = document.getElementById('mp-sdk-script');
+    if (existing) {
+      existing.addEventListener('load', () => resolve(window.MercadoPago));
+      existing.addEventListener('error', reject);
+      return;
+    }
+    const script = document.createElement('script');
+    script.id = 'mp-sdk-script';
+    script.src = 'https://sdk.mercadopago.com/js/v2';
+    script.async = true;
+    script.onload = () => resolve(window.MercadoPago);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
 
 function CheckoutPage() {
   const { id } = useParams();
-  
+
   const [agendamento, setAgendamento] = useState(null);
   const [loja, setLoja] = useState(null);
   const [servico, setServico] = useState(null);
@@ -19,9 +38,16 @@ function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [pendingPaymentInfo, setPendingPaymentInfo] = useState(null);
-  // Só renderiza o Brick depois que o MP estiver inicializado
-  const [mpReady, setMpReady] = useState(false);
+  const [brickError, setBrickError] = useState('');
 
+  // Ref do container onde o Brick vai ser montado
+  const brickContainerRef = useRef(null);
+  // Ref do controller do Brick (para destruir no unmount)
+  const brickControllerRef = useRef(null);
+  // Ref com os dados necessários para montar o Brick
+  const paymentDataRef = useRef(null);
+
+  // Carrega dados do Supabase
   useEffect(() => {
     async function loadData() {
       try {
@@ -35,7 +61,6 @@ function CheckoutPage() {
           setError('Pagamento não existe');
           return;
         }
-
         setAgendamento(agData);
 
         const { data: storeData } = await supabase
@@ -49,15 +74,6 @@ function CheckoutPage() {
           if (storeData.whitelabel_color && storeData.nome_plano !== 'start') {
             document.documentElement.style.setProperty('--primary-color', storeData.whitelabel_color);
           }
-          if (storeData.mp_public_key) {
-            // Só inicializa se ainda não foi inicializado com esta chave
-            if (mpInitializedKey !== storeData.mp_public_key) {
-              initMercadoPago(storeData.mp_public_key, { locale: 'pt-BR' });
-              mpInitializedKey = storeData.mp_public_key;
-            }
-            // Pequeno delay para garantir que o SDK registrou tudo antes de montar o Brick
-            setTimeout(() => setMpReady(true), 300);
-          }
         }
 
         const { data: srvData } = await supabase
@@ -66,9 +82,7 @@ function CheckoutPage() {
           .eq('id', agData.servico_id)
           .single();
 
-        if (srvData) {
-          setServico(srvData);
-        }
+        if (srvData) setServico(srvData);
 
       } catch (err) {
         console.error('Erro ao carregar checkout:', err);
@@ -85,10 +99,121 @@ function CheckoutPage() {
     };
   }, [id]);
 
-  // Polling para verificar se o pagamento foi concluído (útil para PIX)
+  // Monta o Payment Brick via SDK nativo após os dados carregarem
+  useEffect(() => {
+    if (!agendamento || !loja?.mp_public_key || !brickContainerRef.current) return;
+    if (agendamento.pago || paymentSuccess || pendingPaymentInfo) return;
+
+    let destroyed = false;
+
+    async function mountBrick() {
+      try {
+        // Garante que o script SDK está carregado
+        await loadMercadoPagoScript();
+
+        if (destroyed) return;
+
+        // Destrói brick anterior se existir
+        if (brickControllerRef.current) {
+          await brickControllerRef.current.unmount();
+          brickControllerRef.current = null;
+        }
+
+        const mp = new window.MercadoPago(loja.mp_public_key, { locale: 'pt-BR' });
+        const bricksBuilder = mp.bricks();
+
+        const settings = {
+          initialization: {
+            amount: Number(agendamento.valor_total),
+          },
+          customization: {
+            paymentMethods: {
+              ticket: 'all',
+              bankTransfer: 'all',
+              creditCard: 'all',
+              debitCard: 'all',
+              mercadoPago: 'all',
+            },
+          },
+          callbacks: {
+            onReady: () => {
+              console.log('MercadoPago Payment Brick ready!');
+            },
+            onSubmit: async ({ formData }) => {
+              setIsProcessing(true);
+              try {
+                const descricao = servico ? `Lavagem: ${servico.nome}` : 'Serviço de Lavagem';
+                const result = await processPayment(formData, agendamento.id, descricao, loja.mp_access_token);
+
+                if (result.error) {
+                  alert(`Erro no pagamento: ${result.error}`);
+                } else if (result.status === 'approved') {
+                  setPaymentSuccess(true);
+                } else if (result.status === 'in_process') {
+                  alert('Pagamento em processamento. Avisaremos assim que for aprovado!');
+                  setPaymentSuccess(true);
+                } else if (result.status === 'pending') {
+                  if (result.payment_method_id === 'pix' || result.point_of_interaction) {
+                    setPendingPaymentInfo({
+                      type: 'pix',
+                      qrCode: result.point_of_interaction?.transaction_data?.qr_code,
+                      qrCodeBase64: result.point_of_interaction?.transaction_data?.qr_code_base64,
+                    });
+                  } else if (result.payment_type_id === 'ticket') {
+                    setPendingPaymentInfo({
+                      type: 'ticket',
+                      url: result.transaction_details?.external_resource_url,
+                    });
+                  } else {
+                    alert('Aguardando confirmação do pagamento.');
+                  }
+                } else {
+                  alert('Pagamento recusado ou com falha. Tente outro método.');
+                }
+              } catch (err) {
+                console.error(err);
+                alert('Ocorreu um erro inesperado.');
+              } finally {
+                setIsProcessing(false);
+              }
+            },
+            onError: (err) => {
+              console.error('Erro no Brick:', err);
+              setBrickError('Erro ao carregar o formulário de pagamento. Recarregue a página.');
+            },
+          },
+        };
+
+        if (destroyed) return;
+
+        brickControllerRef.current = await bricksBuilder.create(
+          'payment',
+          'mp-payment-brick-container',
+          settings
+        );
+      } catch (err) {
+        console.error('Falha ao montar Payment Brick:', err);
+        if (!destroyed) {
+          setBrickError('Não foi possível carregar o formulário de pagamento. Recarregue a página.');
+        }
+      }
+    }
+
+    mountBrick();
+
+    return () => {
+      destroyed = true;
+      if (brickControllerRef.current) {
+        brickControllerRef.current.unmount().catch(() => {});
+        brickControllerRef.current = null;
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agendamento, loja, servico]);
+
+  // Polling para verificar se o pagamento PIX foi concluído
   useEffect(() => {
     let intervalId;
-    
     if (pendingPaymentInfo && agendamento && !agendamento.pago && !paymentSuccess) {
       intervalId = setInterval(async () => {
         try {
@@ -97,67 +222,18 @@ function CheckoutPage() {
             .select('pago')
             .eq('id', agendamento.id)
             .single();
-            
           if (!error && data && data.pago) {
             setPaymentSuccess(true);
             setPendingPaymentInfo(null);
             clearInterval(intervalId);
           }
         } catch (err) {
-          console.error("Erro ao checar status do pagamento:", err);
+          console.error('Erro ao checar status do pagamento:', err);
         }
-      }, 5000); // Checa a cada 5 segundos
+      }, 5000);
     }
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
+    return () => { if (intervalId) clearInterval(intervalId); };
   }, [pendingPaymentInfo, agendamento, paymentSuccess]);
-
-  const handlePaymentSubmit = async ({ selectedPaymentMethod, formData }) => {
-    setIsProcessing(true);
-    try {
-      const descricao = servico ? `Lavagem: ${servico.nome}` : 'Serviço de Lavagem';
-      const result = await processPayment(formData, agendamento.id, descricao, loja.mp_access_token);
-      
-      if (result.error) {
-        alert(`Erro no pagamento: ${result.error}`);
-      } else if (result.status === 'approved') {
-        setPaymentSuccess(true);
-        // Opcional: Atualizar agendamento.pago = true no Supabase aqui também
-      } else if (result.status === 'in_process') {
-        alert('Pagamento em processamento. Avisaremos assim que for aprovado!');
-        setPaymentSuccess(true);
-      } else if (result.status === 'pending') {
-        if (result.payment_method_id === 'pix' || result.point_of_interaction) {
-          setPendingPaymentInfo({
-            type: 'pix',
-            qrCode: result.point_of_interaction?.transaction_data?.qr_code,
-            qrCodeBase64: result.point_of_interaction?.transaction_data?.qr_code_base64
-          });
-        } else if (result.payment_type_id === 'ticket') {
-           setPendingPaymentInfo({
-             type: 'ticket',
-             url: result.transaction_details?.external_resource_url
-           });
-        } else {
-           alert('Aguardando o pagamento (ex: aguardando PIX ou boleto).');
-        }
-      } else {
-        alert('Pagamento recusado ou com falha. Tente outro método.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Ocorreu um erro inesperado.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const onError = async (error) => {
-    console.error("Erro no Brick:", error);
-    alert("Erro ao carregar o pagamento do Mercado Pago: " + (error?.message || JSON.stringify(error)));
-  };
 
   if (loading) {
     return (
@@ -206,24 +282,24 @@ function CheckoutPage() {
               <div>
                 <p style={{ marginBottom: '15px', color: '#555', fontSize: '15px' }}>Escaneie o QR Code abaixo com o aplicativo do seu banco:</p>
                 {pendingPaymentInfo.qrCodeBase64 && (
-                  <img 
-                    src={`data:image/jpeg;base64,${pendingPaymentInfo.qrCodeBase64}`} 
-                    alt="QR Code PIX" 
-                    style={{ maxWidth: '200px', margin: '0 auto', display: 'block', borderRadius: '8px', border: '1px solid #ddd' }} 
+                  <img
+                    src={`data:image/jpeg;base64,${pendingPaymentInfo.qrCodeBase64}`}
+                    alt="QR Code PIX"
+                    style={{ maxWidth: '200px', margin: '0 auto', display: 'block', borderRadius: '8px', border: '1px solid #ddd' }}
                   />
                 )}
                 <div style={{ marginTop: '20px', textAlign: 'left' }}>
                   <p style={{ fontSize: '14px', marginBottom: '8px', color: '#555', fontWeight: '500' }}>Ou copie o código (PIX Copia e Cola):</p>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <input 
-                      type="text" 
-                      readOnly 
-                      value={pendingPaymentInfo.qrCode || ''} 
-                      className="form-input" 
-                      style={{ flex: 1, fontFamily: 'monospace', fontSize: '12px', padding: '10px' }} 
+                    <input
+                      type="text"
+                      readOnly
+                      value={pendingPaymentInfo.qrCode || ''}
+                      className="form-input"
+                      style={{ flex: 1, fontFamily: 'monospace', fontSize: '12px', padding: '10px' }}
                     />
-                    <button 
-                      className="btn-primary" 
+                    <button
+                      className="btn-primary"
                       onClick={() => {
                         navigator.clipboard.writeText(pendingPaymentInfo.qrCode);
                         alert('Código PIX copiado!');
@@ -240,7 +316,7 @@ function CheckoutPage() {
               <div>
                 <p style={{ marginBottom: '15px', color: '#555' }}>Seu boleto foi gerado com sucesso!</p>
                 <a href={pendingPaymentInfo.url} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                   <i className="fa-solid fa-file-invoice"></i> Visualizar/Imprimir Boleto
+                  <i className="fa-solid fa-file-invoice"></i> Visualizar/Imprimir Boleto
                 </a>
               </div>
             )}
@@ -273,31 +349,30 @@ function CheckoutPage() {
             <div className="checkout-actions">
               {!loja?.mp_public_key ? (
                 <div className="checkout-error" style={{ minHeight: 'auto', padding: '20px' }}>
-                  <p>O lojista ainda não configurou a Chave Pública do Mercado Pago para pagamentos transparentes.</p>
+                  <p>O lojista ainda não configurou a Chave Pública do Mercado Pago.</p>
                 </div>
-              ) : !mpReady ? (
-                <div style={{ textAlign: 'center', padding: '40px 0', color: '#888' }}>
-                  <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '28px', marginBottom: '12px', display: 'block' }}></i>
-                  <p style={{ margin: 0, fontSize: '14px' }}>Carregando opções de pagamento...</p>
+              ) : brickError ? (
+                <div className="checkout-error" style={{ minHeight: 'auto', padding: '20px' }}>
+                  <p>{brickError}</p>
+                  <button
+                    className="btn-pay"
+                    style={{ marginTop: '12px' }}
+                    onClick={() => { setBrickError(''); window.location.reload(); }}
+                  >
+                    Recarregar página
+                  </button>
                 </div>
               ) : (
-                <div className="payment-brick-wrapper" style={{ opacity: isProcessing ? 0.5 : 1, pointerEvents: isProcessing ? 'none' : 'auto' }}>
-                  <Payment
-                    initialization={{ amount: Number(agendamento.valor_total) }}
-                    customization={{
-                      paymentMethods: {
-                        ticket: "all",
-                        bankTransfer: "all",
-                        creditCard: "all",
-                        debitCard: "all",
-                        mercadoPago: "all",
-                      },
-                    }}
-                    onSubmit={handlePaymentSubmit}
-                    onError={onError}
-                    onReady={() => console.log('Payment Brick is ready!')}
-                  />
-                  {isProcessing && <div style={{ textAlign: 'center', marginTop: '10px' }}><i className="fa-solid fa-spinner fa-spin"></i> Processando pagamento...</div>}
+                <div
+                  style={{ opacity: isProcessing ? 0.5 : 1, pointerEvents: isProcessing ? 'none' : 'auto' }}
+                >
+                  {/* Container onde o SDK nativo do MP monta o Brick */}
+                  <div id="mp-payment-brick-container" ref={brickContainerRef}></div>
+                  {isProcessing && (
+                    <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                      <i className="fa-solid fa-spinner fa-spin"></i> Processando pagamento...
+                    </div>
+                  )}
                 </div>
               )}
             </div>
