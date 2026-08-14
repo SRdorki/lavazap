@@ -29,7 +29,10 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/:slug" element={<BookingPage />} />
+        {/* Rotas específicas ANTES do wildcard /:slug */}
+        <Route path="/checkout/:id" element={<CheckoutPage />} />
+        <Route path="/cookies" element={<CookiesPage />} />
+        <Route path="/privacidade" element={<PrivacyPage />} />
         <Route 
           path="/painel" 
           element={
@@ -46,10 +49,8 @@ function App() {
             </SuperAdminRoute>
           } 
         />
-        <Route path="/checkout/:id" element={<CheckoutPage />} />
-        <Route path="/cookies" element={<CookiesPage />} />
-        <Route path="/privacidade" element={<PrivacyPage />} />
-        {/* Redirect any unknown routes to Landing Page */}
+        {/* Wildcard por último para não capturar rotas específicas */}
+        <Route path="/:slug" element={<BookingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
